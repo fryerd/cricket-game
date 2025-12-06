@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Quiz - Channel 9 Australian Summer Style</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ch9-blue: #003B73;
+            --ch9-blue-dark: #002855;
+            --summer-gold: #FFB81C;
+            --gold-dark: #D49B00;
+            --burgundy: #800020;
+            --pitch-green: #2D5016;
+            --cream: #F5E6D3;
+            --cream-dark: #E8D4BD;
+            --charcoal: #2F2F2F;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Sans 3', sans-serif;
+            background: linear-gradient(180deg, var(--cream) 0%, var(--cream-dark) 100%);
+            min-height: 100vh;
+            color: var(--charcoal);
+        }
+
+        /* Sky gradient header */
+        .sky-header {
+            background: linear-gradient(180deg,
+                #87CEEB 0%,
+                #B0E0E6 40%,
+                #FFE4B5 70%,
+                #FFD700 100%
+            );
+            height: 180px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sun {
+            position: absolute;
+            bottom: -40px;
+            right: 60px;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, #FFD700 0%, #FFA500 50%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(2px);
+        }
+
+        .sun::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: #FFF8DC;
+            border-radius: 50%;
+            box-shadow: 0 0 40px #FFD700;
+        }
+
+        /* Cloud shapes */
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50px;
+        }
+
+        .cloud-1 {
+            width: 100px;
+            height: 40px;
+            top: 30px;
+            left: 10%;
+            animation: drift 20s linear infinite;
+        }
+
+        .cloud-2 {
+            width: 80px;
+            height: 30px;
+            top: 50px;
+            left: 40%;
+            animation: drift 25s linear infinite;
+        }
+
+        @keyframes drift {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(100px); }
+        }
+
+        /* Style label */
+        .style-label {
+            position: fixed;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--ch9-blue), var(--ch9-blue-dark));
+            color: var(--summer-gold);
+            font-family: 'Cinzel', serif;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 8px 20px;
+            border-radius: 4px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--summer-gold);
+        }
+
+        /* Scorebug-style header */
+        .scorebug-header {
+            background: linear-gradient(135deg, var(--ch9-blue) 0%, var(--ch9-blue-dark) 100%);
+            margin: -30px 20px 0;
+            border-radius: 6px;
+            padding: 20px 24px;
+            position: relative;
+            z-index: 10;
+            box-shadow:
+                0 4px 20px rgba(0, 59, 115, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 184, 28, 0.3);
+        }
+
+        .scorebug-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--summer-gold), var(--gold-dark), var(--summer-gold));
+            border-radius: 6px 6px 0 0;
+        }
+
+        .header-title {
+            font-family: 'Cinzel', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--summer-gold);
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: 3px;
+        }
+
+        .header-subtitle {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            margin-top: 6px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 30px 20px 40px;
+        }
+
+        /* Panel style */
+        .panel {
+            background: linear-gradient(145deg, #ffffff, var(--cream));
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow:
+                0 4px 15px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            position: relative;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 12px;
+            bottom: 12px;
+            width: 4px;
+            background: linear-gradient(180deg, var(--summer-gold), var(--gold-dark));
+            border-radius: 0 2px 2px 0;
+        }
+
+        .panel-label {
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--ch9-blue);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+            padding-left: 12px;
+        }
+
+        /* Overs selector */
+        .overs-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+        }
+
+        .overs-value {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .overs-number {
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--ch9-blue);
+            line-height: 1;
+        }
+
+        .overs-text {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--charcoal);
+            opacity: 0.6;
+        }
+
+        .overs-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .overs-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 6px;
+            border: 2px solid var(--ch9-blue);
+            background: white;
+            color: var(--ch9-blue);
+            font-size: 24px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .overs-btn:hover {
+            background: var(--ch9-blue);
+            color: white;
+        }
+
+        /* Difficulty buttons - broadcast lower-third style */
+        .difficulty-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 0 12px;
+        }
+
+        .diff-card {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .diff-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .diff-card:hover {
+            transform: translateX(8px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .diff-card:hover::before {
+            opacity: 1;
+        }
+
+        .diff-easy {
+            background: linear-gradient(135deg, var(--pitch-green) 0%, #1f3a0f 100%);
+            color: white;
+        }
+
+        .diff-medium {
+            background: linear-gradient(135deg, var(--summer-gold) 0%, var(--gold-dark) 100%);
+            color: var(--charcoal);
+        }
+
+        .diff-hard {
+            background: linear-gradient(135deg, var(--burgundy) 0%, #5c0017 100%);
+            color: white;
+        }
+
+        .diff-badge {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .diff-info {
+            flex: 1;
+        }
+
+        .diff-name {
+            font-family: 'Cinzel', serif;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .diff-opponents {
+            font-size: 13px;
+            opacity: 0.85;
+            margin-top: 4px;
+        }
+
+        .diff-arrow {
+            font-size: 20px;
+            opacity: 0.6;
+            transition: all 0.25s ease;
+        }
+
+        .diff-card:hover .diff-arrow {
+            opacity: 1;
+            transform: translateX(4px);
+        }
+
+        /* Footer branding */
+        .footer-brand {
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .channel-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, var(--ch9-blue) 0%, var(--ch9-blue-dark) 100%);
+            padding: 12px 24px;
+            border-radius: 6px;
+            box-shadow: 0 2px 10px rgba(0, 59, 115, 0.3);
+        }
+
+        .channel-number {
+            font-family: 'Cinzel', serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--summer-gold);
+            line-height: 1;
+        }
+
+        .channel-text {
+            font-size: 12px;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-left: 1px solid rgba(255, 255, 255, 0.3);
+            padding-left: 12px;
+        }
+
+        /* Cricket stumps decoration */
+        .stumps-deco {
+            position: fixed;
+            bottom: 0;
+            right: 40px;
+            display: flex;
+            gap: 8px;
+            z-index: 50;
+        }
+
+        .stump {
+            width: 8px;
+            height: 80px;
+            background: linear-gradient(180deg, #f5deb3, #d2b48c);
+            border-radius: 2px 2px 0 0;
+            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .bails {
+            position: absolute;
+            top: -6px;
+            left: -4px;
+            right: -4px;
+            height: 8px;
+            background: linear-gradient(180deg, #f5deb3, #d2b48c);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="style-label">Style 3: Channel 9 Summer</div>
+
+    <div class="sky-header">
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="sun"></div>
+    </div>
+
+    <div class="scorebug-header">
+        <h1 class="header-title">Cricket Quiz</h1>
+        <p class="header-subtitle">The Ultimate Test Match Challenge</p>
+    </div>
+
+    <div class="container">
+        <div class="panel">
+            <div class="panel-label">Match Duration</div>
+            <div class="overs-row">
+                <div class="overs-value">
+                    <span class="overs-number">3</span>
+                    <span class="overs-text">Overs</span>
+                </div>
+                <div class="overs-controls">
+                    <button class="overs-btn">−</button>
+                    <button class="overs-btn">+</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-label">Select Your Challenge</div>
+            <div class="difficulty-list">
+                <div class="diff-card diff-easy">
+                    <div class="diff-badge">🌱</div>
+                    <div class="diff-info">
+                        <div class="diff-name">Easy</div>
+                        <div class="diff-opponents">vs Monty Panesar & WG Grace</div>
+                    </div>
+                    <span class="diff-arrow">→</span>
+                </div>
+                <div class="diff-card diff-medium">
+                    <div class="diff-badge">🔥</div>
+                    <div class="diff-info">
+                        <div class="diff-name">Medium</div>
+                        <div class="diff-opponents">vs Anil Kumble & Sunil Gavaskar</div>
+                    </div>
+                    <span class="diff-arrow">→</span>
+                </div>
+                <div class="diff-card diff-hard">
+                    <div class="diff-badge">💀</div>
+                    <div class="diff-info">
+                        <div class="diff-name">Hard</div>
+                        <div class="diff-opponents">vs Shane Warne & Don Bradman</div>
+                    </div>
+                    <span class="diff-arrow">→</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-brand">
+            <div class="channel-logo">
+                <span class="channel-number">9</span>
+                <span class="channel-text">Wide World<br>of Cricket</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="stumps-deco">
+        <div class="stump"></div>
+        <div class="stump"></div>
+        <div class="stump"></div>
+        <div class="bails"></div>
+    </div>
+
+    <script>
+        // Overs control
+        let overs = 3;
+        const oversNumber = document.querySelector('.overs-number');
+        const buttons = document.querySelectorAll('.overs-btn');
+
+        buttons[0].addEventListener('click', () => {
+            if (overs > 1) {
+                overs--;
+                oversNumber.textContent = overs;
+            }
+        });
+
+        buttons[1].addEventListener('click', () => {
+            if (overs < 5) {
+                overs++;
+                oversNumber.textContent = overs;
+            }
+        });
+    </script>
+</body>
+</html>

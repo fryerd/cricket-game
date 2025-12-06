@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Quiz - 1992 World Cup Style</title>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bh-gold: #D4AF37;
+            --racing-orange: #FF6B35;
+            --electric-teal: #00B4D8;
+            --pakistan-green: #006B3F;
+            --crt-black: #1A1A1A;
+            --warm-brown: #8B4513;
+            --cream: #F5E6C8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: var(--crt-black);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* CRT Scanline overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.15) 2px,
+                rgba(0,0,0,0.15) 4px
+            );
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* CRT vignette */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.4) 100%);
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        /* Animated speed stripes background */
+        .bg-stripes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                repeating-linear-gradient(
+                    -45deg,
+                    var(--pakistan-green) 0px,
+                    var(--pakistan-green) 40px,
+                    #005030 40px,
+                    #005030 80px
+                );
+            z-index: -1;
+        }
+
+        .speed-lines {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 300%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent 0px,
+                transparent 100px,
+                rgba(255, 107, 53, 0.15) 100px,
+                rgba(255, 107, 53, 0.15) 120px
+            );
+            animation: speedMove 3s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes speedMove {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(33.33%); }
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Main title with 90s beveled effect */
+        .title-block {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title-main {
+            font-family: 'Anton', sans-serif;
+            font-size: 4rem;
+            color: var(--bh-gold);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-shadow:
+                4px 4px 0 var(--warm-brown),
+                6px 6px 0 var(--crt-black),
+                0 0 30px rgba(212, 175, 55, 0.5);
+            -webkit-text-stroke: 2px var(--warm-brown);
+            position: relative;
+            display: inline-block;
+        }
+
+        .title-sub {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.4rem;
+            color: var(--electric-teal);
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            margin-top: 10px;
+            text-shadow: 2px 2px 0 var(--crt-black);
+        }
+
+        /* Beveled container */
+        .game-panel {
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            border: 6px solid var(--bh-gold);
+            border-radius: 0;
+            position: relative;
+            padding: 30px;
+            box-shadow:
+                8px 8px 0 var(--warm-brown),
+                inset 0 0 40px rgba(212, 175, 55, 0.1);
+        }
+
+        .game-panel::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+            border: 3px solid var(--racing-orange);
+            pointer-events: none;
+        }
+
+        .section-title {
+            font-family: 'Anton', sans-serif;
+            font-size: 2rem;
+            color: var(--cream);
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 25px;
+            text-shadow: 2px 2px 0 var(--crt-black);
+        }
+
+        /* Overs slider - retro style */
+        .overs-control {
+            background: linear-gradient(180deg, #333, #222);
+            border: 4px solid var(--electric-teal);
+            padding: 20px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .overs-control::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 10px;
+            right: 10px;
+            height: 8px;
+            background: var(--warm-brown);
+        }
+
+        .overs-label {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1rem;
+            color: var(--electric-teal);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .overs-display {
+            font-family: 'Anton', sans-serif;
+            font-size: 3rem;
+            color: var(--bh-gold);
+            text-align: center;
+            text-shadow:
+                3px 3px 0 var(--warm-brown),
+                0 0 20px rgba(212, 175, 55, 0.4);
+            margin-bottom: 15px;
+        }
+
+        .slider-track {
+            width: 100%;
+            height: 20px;
+            background: linear-gradient(180deg, #111, #333);
+            border: 3px solid var(--warm-brown);
+            border-radius: 0;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .slider-fill {
+            height: 100%;
+            width: 60%;
+            background: linear-gradient(90deg, var(--racing-orange), var(--bh-gold));
+            position: relative;
+        }
+
+        .slider-fill::after {
+            content: '';
+            position: absolute;
+            right: -12px;
+            top: -6px;
+            width: 24px;
+            height: 26px;
+            background: var(--bh-gold);
+            border: 3px solid var(--warm-brown);
+            box-shadow: 2px 2px 0 var(--crt-black);
+        }
+
+        /* Difficulty buttons - chunky 90s style */
+        .difficulty-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .diff-btn {
+            font-family: 'Anton', sans-serif;
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            padding: 25px 30px;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.1s ease;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .diff-btn::before {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            right: 6px;
+            bottom: 6px;
+            border: 2px dashed currentColor;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .diff-btn:hover {
+            transform: translate(-4px, -4px);
+        }
+
+        .diff-btn:active {
+            transform: translate(2px, 2px);
+        }
+
+        .diff-easy {
+            background: linear-gradient(180deg, var(--pakistan-green), #004d2d);
+            color: var(--cream);
+            border: 5px solid var(--bh-gold);
+            box-shadow: 6px 6px 0 var(--warm-brown);
+        }
+
+        .diff-easy:hover {
+            box-shadow: 10px 10px 0 var(--warm-brown);
+        }
+
+        .diff-medium {
+            background: linear-gradient(180deg, var(--racing-orange), #cc5529);
+            color: var(--crt-black);
+            border: 5px solid var(--bh-gold);
+            box-shadow: 6px 6px 0 var(--warm-brown);
+        }
+
+        .diff-medium:hover {
+            box-shadow: 10px 10px 0 var(--warm-brown);
+        }
+
+        .diff-hard {
+            background: linear-gradient(180deg, #8B0000, #5c0000);
+            color: var(--bh-gold);
+            border: 5px solid var(--bh-gold);
+            box-shadow: 6px 6px 0 var(--warm-brown);
+        }
+
+        .diff-hard:hover {
+            box-shadow: 10px 10px 0 var(--warm-brown);
+        }
+
+        .opponent-names {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            opacity: 0.9;
+        }
+
+        /* Decorative cricket ball */
+        .cricket-ball {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle at 30% 30%, #cc2200, #8B0000);
+            border-radius: 50%;
+            border: 4px solid var(--warm-brown);
+            box-shadow:
+                4px 4px 0 var(--crt-black),
+                0 0 30px rgba(139, 0, 0, 0.5);
+            z-index: 100;
+        }
+
+        .cricket-ball::before,
+        .cricket-ball::after {
+            content: '';
+            position: absolute;
+            background: var(--cream);
+            border-radius: 50%;
+        }
+
+        .cricket-ball::before {
+            top: 35%;
+            left: 10%;
+            width: 80%;
+            height: 6px;
+            transform: rotate(-20deg);
+        }
+
+        .cricket-ball::after {
+            top: 55%;
+            left: 10%;
+            width: 80%;
+            height: 6px;
+            transform: rotate(20deg);
+        }
+
+        /* Sponsor bar - 90s style */
+        .sponsor-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(90deg, var(--bh-gold), #c9a030, var(--bh-gold));
+            padding: 8px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            border-top: 4px solid var(--warm-brown);
+            z-index: 100;
+        }
+
+        .sponsor-text {
+            font-family: 'Anton', sans-serif;
+            font-size: 1rem;
+            color: var(--crt-black);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        /* Corner chevrons */
+        .chevron-corner {
+            position: fixed;
+            width: 100px;
+            height: 100px;
+            z-index: 50;
+        }
+
+        .chevron-corner.top-left {
+            top: 0;
+            left: 0;
+            background: linear-gradient(135deg, var(--racing-orange) 50%, transparent 50%);
+        }
+
+        .chevron-corner.top-right {
+            top: 0;
+            right: 0;
+            background: linear-gradient(-135deg, var(--electric-teal) 50%, transparent 50%);
+        }
+
+        /* Style label */
+        .style-label {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--racing-orange);
+            color: var(--crt-black);
+            font-family: 'Anton', sans-serif;
+            font-size: 0.8rem;
+            padding: 8px 20px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            border: 3px solid var(--bh-gold);
+            z-index: 200;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-stripes"></div>
+    <div class="speed-lines"></div>
+
+    <div class="chevron-corner top-left"></div>
+    <div class="chevron-corner top-right"></div>
+
+    <div class="style-label">Style 1: 1992 World Cup</div>
+
+    <div class="container">
+        <div class="title-block">
+            <div class="title-main">Cricket Quiz</div>
+            <div class="title-sub">The Ultimate Challenge</div>
+        </div>
+
+        <div class="game-panel">
+            <div class="section-title">Select Your Match</div>
+
+            <div class="overs-control">
+                <div class="overs-label">Match Duration</div>
+                <div class="overs-display">3 Overs</div>
+                <div class="slider-track">
+                    <div class="slider-fill"></div>
+                </div>
+            </div>
+
+            <div class="difficulty-grid">
+                <button class="diff-btn diff-easy">
+                    <span>Easy</span>
+                    <span class="opponent-names">vs Monty & Grace</span>
+                </button>
+                <button class="diff-btn diff-medium">
+                    <span>Medium</span>
+                    <span class="opponent-names">vs Kumble & Gavaskar</span>
+                </button>
+                <button class="diff-btn diff-hard">
+                    <span>Hard</span>
+                    <span class="opponent-names">vs Warne & Bradman</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="cricket-ball"></div>
+
+    <div class="sponsor-bar">
+        <span class="sponsor-text">World Cup 1992</span>
+        <span class="sponsor-text">•</span>
+        <span class="sponsor-text">Cricket Quiz Challenge</span>
+    </div>
+</body>
+</html>
