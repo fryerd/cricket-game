@@ -16,8 +16,9 @@
             --crt-black: #1A1A1A;
             --warm-brown: #8B4513;
             --cream: #F5E6C8;
-            --wicket-red: #8B0000;
-            --success-green: #228B22;
+            --wicket-red: #dc3545;
+            --success-green: #28a745;
+            --ball-current: #17a2b8;
         }
 
         * {
@@ -46,24 +47,11 @@
                 0deg,
                 transparent,
                 transparent 2px,
-                rgba(0,0,0,0.12) 2px,
-                rgba(0,0,0,0.12) 4px
+                rgba(0,0,0,0.1) 2px,
+                rgba(0,0,0,0.1) 4px
             );
             pointer-events: none;
             z-index: 1000;
-        }
-
-        /* CRT vignette */
-        body::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.4) 100%);
-            pointer-events: none;
-            z-index: 999;
         }
 
         /* Animated background */
@@ -106,18 +94,19 @@
             100% { transform: translateX(33.33%); }
         }
 
-        /* Hide animated background during gameplay */
         body.gameplay .bg-stripes,
         body.gameplay .speed-lines {
             opacity: 0;
         }
 
         body.gameplay {
-            background: linear-gradient(180deg, var(--pakistan-green-dark) 0%, var(--crt-black) 100%);
+            background: #e8e8e8;
+            background-image: radial-gradient(circle, #ccc 1px, transparent 1px);
+            background-size: 20px 20px;
         }
 
         .container {
-            max-width: 700px;
+            max-width: 800px;
             margin: 0 auto;
             padding: 20px;
             position: relative;
@@ -125,7 +114,7 @@
             min-height: 100vh;
         }
 
-        /* Header */
+        /* Welcome Header */
         .header {
             text-align: center;
             margin-bottom: 20px;
@@ -156,107 +145,163 @@
             box-shadow: 4px 4px 0 var(--warm-brown);
         }
 
-        /* Scoreboard */
-        .scoreboard {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .score-box {
-            flex: 1;
-            background: linear-gradient(180deg, #2a2a2a, #1a1a1a);
-            border: 4px solid var(--bh-gold);
-            padding: 12px 8px;
-            text-align: center;
-            box-shadow: 4px 4px 0 var(--warm-brown);
-        }
-
-        .score-box h3 {
-            font-family: 'Fredoka', sans-serif;
-            font-size: 0.7rem;
-            color: var(--electric-teal);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
-        }
-
-        .score-box .score {
-            font-family: 'Anton', sans-serif;
-            font-size: 2rem;
-            color: var(--bh-gold);
-            text-shadow: 2px 2px 0 var(--warm-brown);
-        }
-
-        .score-box .detail {
-            font-size: 0.75rem;
-            color: var(--cream);
-            opacity: 0.8;
-            margin-top: 3px;
-        }
-
-        /* Over Tracker */
-        .over-tracker {
-            background: linear-gradient(180deg, #333, #222);
-            border: 3px solid var(--racing-orange);
-            padding: 12px 15px;
+        /* ========== NEW SCOREBUG ========== */
+        .scorebug {
+            background: linear-gradient(180deg, #3a3a3a, #2a2a2a);
+            border: 4px solid var(--crt-black);
+            border-radius: 8px;
+            padding: 12px 20px;
             margin-bottom: 20px;
-            box-shadow: 4px 4px 0 var(--warm-brown);
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        .over-tracker strong {
-            color: var(--racing-orange);
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .over-tracker .balls {
+        .scorebug-side {
             display: flex;
-            gap: 8px;
-            margin-top: 10px;
+            align-items: center;
+            gap: 10px;
         }
 
-        .ball-indicator {
-            width: 32px;
-            height: 32px;
+        .scorebug-side.right {
+            justify-content: flex-end;
+        }
+
+        .player-avatar {
+            font-size: 1.8rem;
+        }
+
+        .player-label {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #ddd;
+        }
+
+        .ball-history {
+            display: flex;
+            gap: 5px;
+        }
+
+        .ball-dot {
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
-            background: #444;
+            background: #555;
             border: 2px solid #666;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.8rem;
-            font-weight: 600;
+            font-size: 0.7rem;
+            font-weight: 700;
             color: #888;
         }
 
-        .ball-indicator.correct {
+        .ball-dot.runs {
             background: var(--success-green);
-            border-color: #1a6b1a;
+            border-color: #1e7e34;
             color: white;
-            box-shadow: 0 0 10px rgba(34, 139, 34, 0.5);
         }
 
-        .ball-indicator.wrong {
+        .ball-dot.wicket {
             background: var(--wicket-red);
-            border-color: #5c0000;
+            border-color: #bd2130;
             color: white;
-            box-shadow: 0 0 10px rgba(139, 0, 0, 0.5);
         }
 
-        /* Main Panel */
+        .ball-dot.current {
+            background: var(--ball-current);
+            border-color: #138496;
+            color: white;
+        }
+
+        .scorebug-center {
+            text-align: center;
+            position: relative;
+        }
+
+        .scorebug-center::before,
+        .scorebug-center::after {
+            content: '';
+            position: absolute;
+            top: -12px;
+            bottom: -12px;
+            width: 4px;
+            background: var(--crt-black);
+        }
+
+        .scorebug-center::before {
+            left: -20px;
+            clip-path: polygon(0 20%, 100% 0, 100% 100%, 0 80%);
+        }
+
+        .scorebug-center::after {
+            right: -20px;
+            clip-path: polygon(0 0, 100% 20%, 100% 80%, 0 100%);
+        }
+
+        .main-score {
+            font-family: 'Anton', sans-serif;
+            font-size: 2.5rem;
+            color: white;
+            letter-spacing: 2px;
+        }
+
+        .score-details {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 0.8rem;
+            color: #aaa;
+            margin-top: 2px;
+        }
+
+        /* ========== PROGRESS BAR ========== */
+        .progress-bar {
+            display: flex;
+            height: 8px;
+            background: #ddd;
+            border-radius: 0;
+            overflow: hidden;
+            margin-bottom: 0;
+        }
+
+        .progress-segment {
+            flex: 1;
+            background: #ccc;
+            transition: background 0.3s ease;
+        }
+
+        .progress-segment.active {
+            background: var(--electric-teal);
+        }
+
+        .progress-segment.completed {
+            background: var(--electric-teal);
+        }
+
+        .progress-segment + .progress-segment {
+            border-left: 2px solid white;
+        }
+
+        /* ========== GAME PANEL ========== */
         .game-panel {
-            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
-            border: 6px solid var(--bh-gold);
+            background: white;
+            border: 4px solid var(--crt-black);
             position: relative;
             padding: 25px;
-            box-shadow: 8px 8px 0 var(--warm-brown);
-            margin-bottom: 20px;
+            box-shadow: 6px 6px 0 rgba(0,0,0,0.2);
         }
 
-        .game-panel::before {
+        .game-panel.welcome {
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            border: 6px solid var(--bh-gold);
+            box-shadow: 8px 8px 0 var(--warm-brown);
+        }
+
+        .game-panel.welcome::before {
             content: '';
             position: absolute;
             top: 8px;
@@ -278,7 +323,7 @@
             text-shadow: 2px 2px 0 var(--crt-black);
         }
 
-        /* Difficulty Screen */
+        /* ========== DIFFICULTY SCREEN ========== */
         .overs-control {
             background: linear-gradient(180deg, #333, #222);
             border: 4px solid var(--electric-teal);
@@ -336,15 +381,6 @@
             box-shadow: 2px 2px 0 var(--crt-black);
         }
 
-        .overs-slider::-moz-range-thumb {
-            width: 28px;
-            height: 28px;
-            background: linear-gradient(180deg, var(--bh-gold-light), var(--bh-gold));
-            border: 3px solid var(--warm-brown);
-            cursor: pointer;
-            border-radius: 0;
-        }
-
         .difficulty-grid {
             display: flex;
             flex-direction: column;
@@ -371,10 +407,6 @@
             transform: translate(-3px, -3px);
         }
 
-        .diff-btn:active {
-            transform: translate(2px, 2px);
-        }
-
         .diff-easy {
             background: linear-gradient(180deg, var(--pakistan-green), var(--pakistan-green-dark));
             color: var(--cream);
@@ -382,9 +414,7 @@
             box-shadow: 5px 5px 0 var(--warm-brown);
         }
 
-        .diff-easy:hover {
-            box-shadow: 8px 8px 0 var(--warm-brown);
-        }
+        .diff-easy:hover { box-shadow: 8px 8px 0 var(--warm-brown); }
 
         .diff-medium {
             background: linear-gradient(180deg, var(--racing-orange), #cc5529);
@@ -393,20 +423,16 @@
             box-shadow: 5px 5px 0 var(--warm-brown);
         }
 
-        .diff-medium:hover {
-            box-shadow: 8px 8px 0 var(--warm-brown);
-        }
+        .diff-medium:hover { box-shadow: 8px 8px 0 var(--warm-brown); }
 
         .diff-hard {
-            background: linear-gradient(180deg, var(--wicket-red), #5c0000);
+            background: linear-gradient(180deg, #8B0000, #5c0000);
             color: var(--bh-gold);
             border: 4px solid var(--bh-gold);
             box-shadow: 5px 5px 0 var(--warm-brown);
         }
 
-        .diff-hard:hover {
-            box-shadow: 8px 8px 0 var(--warm-brown);
-        }
+        .diff-hard:hover { box-shadow: 8px 8px 0 var(--warm-brown); }
 
         .opponent-names {
             font-family: 'Fredoka', sans-serif;
@@ -416,14 +442,14 @@
             opacity: 0.9;
         }
 
-        /* Question Screen */
+        /* ========== QUESTION SCREEN ========== */
         .question-text {
             font-family: 'Fredoka', sans-serif;
-            font-size: 1.25rem;
+            font-size: 1.4rem;
             font-weight: 600;
-            color: var(--cream);
+            color: var(--crt-black);
             text-align: center;
-            line-height: 1.5;
+            line-height: 1.4;
             margin-bottom: 25px;
             padding: 0 10px;
         }
@@ -439,27 +465,25 @@
             font-size: 1rem;
             font-weight: 500;
             padding: 15px 20px;
-            text-align: left;
-            background: linear-gradient(180deg, #444, #333);
-            color: var(--cream);
-            border: 3px solid #666;
+            text-align: center;
+            background: white;
+            color: var(--crt-black);
+            border: 3px solid var(--crt-black);
             cursor: pointer;
             transition: all 0.15s ease;
-            box-shadow: 3px 3px 0 var(--crt-black);
+            box-shadow: 4px 4px 0 var(--crt-black);
         }
 
         .option-btn:hover {
-            background: linear-gradient(180deg, #555, #444);
-            border-color: var(--electric-teal);
+            background: #f0f0f0;
             transform: translate(-2px, -2px);
-            box-shadow: 5px 5px 0 var(--crt-black);
+            box-shadow: 6px 6px 0 var(--crt-black);
         }
 
         .option-btn.selected {
-            background: linear-gradient(180deg, var(--electric-teal), #0090a8);
-            color: var(--crt-black);
-            border-color: var(--bh-gold);
-            font-weight: 600;
+            background: var(--electric-teal);
+            color: white;
+            border-color: var(--crt-black);
         }
 
         .submit-btn {
@@ -469,9 +493,9 @@
             letter-spacing: 2px;
             margin-top: 20px;
             padding: 15px 40px;
-            background: linear-gradient(180deg, var(--bh-gold-light), var(--bh-gold));
+            background: var(--bh-gold);
             color: var(--crt-black);
-            border: 4px solid var(--warm-brown);
+            border: 4px solid var(--crt-black);
             cursor: pointer;
             box-shadow: 4px 4px 0 var(--crt-black);
             transition: all 0.1s ease;
@@ -484,153 +508,142 @@
         }
 
         .submit-btn:disabled {
-            background: linear-gradient(180deg, #555, #444);
+            background: #ccc;
             color: #888;
-            border-color: #666;
             cursor: not-allowed;
-            box-shadow: 2px 2px 0 var(--crt-black);
         }
 
         .submit-btn:disabled:hover {
             transform: none;
+            box-shadow: 4px 4px 0 var(--crt-black);
         }
 
-        /* Delivery Screen */
+        /* ========== DELIVERY SCREEN ========== */
         .delivery-prompt {
-            font-family: 'Anton', sans-serif;
-            font-size: 1.4rem;
-            color: var(--cream);
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #666;
             text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 2px;
             margin-bottom: 25px;
         }
 
         .number-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 12px;
-            max-width: 350px;
+            max-width: 320px;
             margin: 0 auto;
         }
 
         .number-btn {
             font-family: 'Anton', sans-serif;
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             padding: 25px 15px;
-            background: linear-gradient(180deg, var(--pakistan-green), var(--pakistan-green-dark));
-            color: var(--cream);
-            border: 4px solid var(--bh-gold);
+            background: white;
+            color: var(--crt-black);
+            border: 4px solid var(--crt-black);
             cursor: pointer;
-            box-shadow: 4px 4px 0 var(--warm-brown);
+            box-shadow: 4px 4px 0 var(--crt-black);
             transition: all 0.1s ease;
         }
 
         .number-btn:hover {
-            background: linear-gradient(180deg, #007a4a, var(--pakistan-green));
+            background: #f0f0f0;
             transform: translate(-2px, -2px);
-            box-shadow: 6px 6px 0 var(--warm-brown);
+            box-shadow: 6px 6px 0 var(--crt-black);
         }
 
         .number-btn:disabled {
-            background: linear-gradient(180deg, #444, #333);
-            color: #666;
-            border: 3px dashed #666;
+            background: #eee;
+            color: #bbb;
+            border: 3px dashed #ccc;
             cursor: not-allowed;
-            box-shadow: 2px 2px 0 var(--crt-black);
+            box-shadow: none;
         }
 
         .number-btn:disabled:hover {
             transform: none;
-            box-shadow: 2px 2px 0 var(--crt-black);
         }
 
         .warning-text {
             font-family: 'Fredoka', sans-serif;
             font-size: 0.9rem;
             font-weight: 600;
-            color: var(--racing-orange);
+            color: var(--wicket-red);
             text-align: center;
             margin-top: 20px;
             padding: 10px;
-            background: rgba(255, 107, 53, 0.15);
-            border: 2px solid var(--racing-orange);
+            background: rgba(220, 53, 69, 0.1);
+            border: 2px solid var(--wicket-red);
+            grid-column: 1 / -1;
         }
 
-        /* Result Screen */
-        .result-reveal {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
+        /* ========== RESULT/REVEAL SCREEN ========== */
+        .commentary-banner {
+            background: linear-gradient(180deg, #d4edfc, #b8e0f7);
+            border: 3px solid var(--electric-teal);
+            padding: 15px 20px;
             margin-bottom: 25px;
-            gap: 20px;
-        }
-
-        .choice-display {
             text-align: center;
         }
 
-        .choice-display h3 {
-            font-family: 'Fredoka', sans-serif;
-            font-size: 0.85rem;
-            color: var(--electric-teal);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-        }
-
-        .choice-number {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(180deg, var(--bh-gold-light), var(--bh-gold));
-            border: 4px solid var(--warm-brown);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Anton', sans-serif;
-            font-size: 2.5rem;
-            color: var(--crt-black);
-            box-shadow: 4px 4px 0 var(--crt-black);
-        }
-
-        .vs-text {
-            font-family: 'Anton', sans-serif;
-            font-size: 1.5rem;
-            color: var(--racing-orange);
-            text-shadow: 2px 2px 0 var(--crt-black);
-        }
-
-        .commentary-box {
-            background: linear-gradient(180deg, #3a3520, #2a2515);
-            border: 4px solid var(--bh-gold);
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 4px 4px 0 var(--warm-brown);
-        }
-
-        .commentary-box.wicket {
-            background: linear-gradient(180deg, #3a1515, #2a1010);
+        .commentary-banner.wicket {
+            background: linear-gradient(180deg, #f8d7da, #f5c6cb);
             border-color: var(--wicket-red);
-        }
-
-        .commentary-title {
-            font-family: 'Anton', sans-serif;
-            font-size: 1.3rem;
-            color: var(--bh-gold);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
-        }
-
-        .commentary-box.wicket .commentary-title {
-            color: var(--racing-orange);
         }
 
         .commentary-text {
             font-family: 'Fredoka', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--crt-black);
+        }
+
+        .result-reveal {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            padding: 30px 0;
+        }
+
+        .reveal-player {
+            text-align: center;
+        }
+
+        .reveal-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .reveal-circle.batsman {
+            background: rgba(40, 167, 69, 0.2);
+            border: 4px solid var(--success-green);
+        }
+
+        .reveal-circle.bowler {
+            background: rgba(255, 107, 53, 0.2);
+            border: 4px solid var(--racing-orange);
+        }
+
+        .reveal-circle .number {
+            font-family: 'Anton', sans-serif;
+            color: var(--crt-black);
+        }
+
+        .reveal-label {
+            font-family: 'Fredoka', sans-serif;
             font-size: 1rem;
-            color: var(--cream);
-            line-height: 1.5;
+            font-weight: 600;
+            color: #666;
         }
 
         .next-btn {
@@ -639,21 +652,22 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             padding: 15px 40px;
-            background: linear-gradient(180deg, var(--electric-teal), #0090a8);
-            color: var(--crt-black);
-            border: 4px solid var(--bh-gold);
+            background: var(--electric-teal);
+            color: white;
+            border: 4px solid var(--crt-black);
             cursor: pointer;
-            box-shadow: 4px 4px 0 var(--warm-brown);
+            box-shadow: 4px 4px 0 var(--crt-black);
             transition: all 0.1s ease;
             width: 100%;
+            margin-top: 20px;
         }
 
         .next-btn:hover {
             transform: translate(-2px, -2px);
-            box-shadow: 6px 6px 0 var(--warm-brown);
+            box-shadow: 6px 6px 0 var(--crt-black);
         }
 
-        /* Summary Screen */
+        /* ========== SUMMARY SCREEN ========== */
         .summary-title {
             font-family: 'Anton', sans-serif;
             font-size: 2rem;
@@ -716,7 +730,7 @@
         }
 
         .winner-message.lose {
-            color: var(--wicket-red);
+            color: #8B0000;
             text-shadow: 2px 2px 0 var(--crt-black);
         }
 
@@ -800,31 +814,58 @@
             background: linear-gradient(-135deg, var(--electric-teal) 50%, transparent 50%);
         }
 
+        body.gameplay .corner-deco {
+            display: none;
+        }
+
         .hidden {
             display: none !important;
         }
 
         /* Mobile adjustments */
-        @media (max-width: 500px) {
+        @media (max-width: 600px) {
             .title-main {
                 font-size: 2rem;
             }
 
-            .scoreboard {
-                flex-wrap: wrap;
+            .scorebug {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                padding: 10px;
             }
 
-            .score-box .score {
-                font-size: 1.5rem;
+            .scorebug-side {
+                justify-content: center;
+            }
+
+            .scorebug-center::before,
+            .scorebug-center::after {
+                display: none;
+            }
+
+            .ball-dot {
+                width: 24px;
+                height: 24px;
+                font-size: 0.6rem;
+            }
+
+            .main-score {
+                font-size: 2rem;
             }
 
             .number-btn {
-                font-size: 1.8rem;
+                font-size: 2rem;
                 padding: 20px 10px;
             }
 
-            .game-panel {
-                padding: 20px 15px;
+            .reveal-circle {
+                width: 80px;
+                height: 80px;
+                font-size: 2rem;
+            }
+
+            .result-reveal {
+                gap: 25px;
             }
 
             .corner-deco {
@@ -841,41 +882,37 @@
     <div class="corner-deco top-right"></div>
 
     <div class="container">
-        <!-- Header -->
-        <div class="header">
+        <!-- Welcome Header (only on difficulty screen) -->
+        <div class="header" id="welcomeHeader">
             <h1 class="title-main">Cricket Quiz</h1>
             <div class="innings-bar" id="inningsInfo">Select Difficulty to Begin</div>
         </div>
 
-        <!-- Scoreboard -->
-        <div class="scoreboard hidden" id="scoreboard">
-            <div class="score-box">
-                <h3 id="battingLabel">Batting</h3>
-                <div class="score" id="playerScore">0</div>
-                <div class="detail" id="playerWickets">Wickets: 0</div>
+        <!-- Scorebug (during gameplay) -->
+        <div class="scorebug hidden" id="scorebug">
+            <div class="scorebug-side">
+                <span class="player-avatar" id="batsmanAvatar">🧑</span>
+                <span class="player-label" id="batsmanLabel">Batsman</span>
+                <div class="ball-history" id="batsmanBalls"></div>
             </div>
-            <div class="score-box">
-                <h3>Overs</h3>
-                <div class="score" id="overDisplay">0.0</div>
-                <div class="detail" id="totalOvers">of 3.0</div>
+            <div class="scorebug-center">
+                <div class="main-score" id="mainScore">0 - 0</div>
+                <div class="score-details">
+                    <span id="targetDisplay">Target: -</span>
+                    <span id="oversDisplay">Overs: 0.0</span>
+                </div>
             </div>
-            <div class="score-box">
-                <h3 id="targetLabel">Target</h3>
-                <div class="score" id="computerScore">-</div>
-                <div class="detail" id="computerWickets"></div>
+            <div class="scorebug-side right">
+                <div class="ball-history" id="bowlerBalls"></div>
+                <span class="player-label" id="bowlerLabel">Bowler</span>
+                <span class="player-avatar" id="bowlerAvatar">🧑</span>
             </div>
-        </div>
-
-        <!-- Over Tracker -->
-        <div class="over-tracker hidden" id="overTracker">
-            <strong>This Over:</strong>
-            <div class="balls" id="ballsDisplay"></div>
         </div>
 
         <!-- Game Content -->
         <div id="gameContent">
             <!-- Difficulty Selection -->
-            <div class="game-panel" id="difficultyScreen">
+            <div class="game-panel welcome" id="difficultyScreen">
                 <div class="section-title">Select Your Match</div>
 
                 <div class="overs-control">
@@ -902,44 +939,61 @@
 
             <!-- Question Phase -->
             <div class="game-panel hidden" id="questionScreen">
-                <div class="section-title">Answer the Question</div>
-                <div class="question-text" id="questionText"></div>
-                <div class="options-grid" id="questionOptions"></div>
-                <button class="submit-btn" id="submitAnswer" onclick="submitAnswer()" disabled>
-                    Submit Answer
-                </button>
+                <div class="progress-bar">
+                    <div class="progress-segment active" id="progressQuestion"></div>
+                    <div class="progress-segment" id="progressDelivery"></div>
+                </div>
+                <div style="padding-top: 20px;">
+                    <div class="question-text" id="questionText"></div>
+                    <div class="options-grid" id="questionOptions"></div>
+                    <button class="submit-btn" id="submitAnswer" onclick="submitAnswer()" disabled>
+                        Submit Answer
+                    </button>
+                </div>
             </div>
 
             <!-- Delivery Phase -->
             <div class="game-panel hidden" id="deliveryScreen">
-                <div class="section-title">Make Your Move</div>
-                <div class="delivery-prompt" id="deliveryPrompt">Pick your number</div>
-                <div class="number-grid" id="numberOptions"></div>
+                <div class="progress-bar">
+                    <div class="progress-segment completed"></div>
+                    <div class="progress-segment active"></div>
+                </div>
+                <div style="padding-top: 20px;">
+                    <div class="delivery-prompt" id="deliveryPrompt">How many runs do you want to score?</div>
+                    <div class="number-grid" id="numberOptions"></div>
+                </div>
             </div>
 
             <!-- Result Phase -->
             <div class="game-panel hidden" id="resultScreen">
-                <div class="section-title">Ball Result</div>
-                <div class="result-reveal">
-                    <div class="choice-display">
-                        <h3>You Chose</h3>
-                        <div class="choice-number" id="playerChoice">0</div>
-                    </div>
-                    <div class="vs-text">VS</div>
-                    <div class="choice-display">
-                        <h3>Computer</h3>
-                        <div class="choice-number" id="computerChoice">0</div>
-                    </div>
+                <div class="progress-bar">
+                    <div class="progress-segment completed"></div>
+                    <div class="progress-segment completed"></div>
                 </div>
-                <div class="commentary-box" id="commentary">
-                    <div class="commentary-title" id="commentaryTitle">Result</div>
-                    <div class="commentary-text" id="commentaryText"></div>
+                <div style="padding-top: 20px;">
+                    <div class="commentary-banner" id="commentaryBanner">
+                        <div class="commentary-text" id="commentaryText"></div>
+                    </div>
+                    <div class="result-reveal">
+                        <div class="reveal-player">
+                            <div class="reveal-circle batsman" id="revealBatsman">
+                                <span class="number" id="batsmanNumber"></span>
+                            </div>
+                            <div class="reveal-label">Batsman</div>
+                        </div>
+                        <div class="reveal-player">
+                            <div class="reveal-circle bowler" id="revealBowler">
+                                <span class="number" id="bowlerNumber"></span>
+                            </div>
+                            <div class="reveal-label">Bowler</div>
+                        </div>
+                    </div>
+                    <button class="next-btn" onclick="nextBall()">Next Ball</button>
                 </div>
-                <button class="next-btn" onclick="nextBall()">Next Ball</button>
             </div>
 
             <!-- Summary Screen -->
-            <div class="game-panel hidden" id="summaryScreen">
+            <div class="game-panel welcome hidden" id="summaryScreen">
                 <div class="summary-title" id="summaryTitle">Match Complete!</div>
 
                 <div class="innings-summary">
@@ -970,11 +1024,12 @@
     <script>
         // Game Constants
         const SCORING_OPTIONS = [0, 1, 2, 3, 4, 6];
+        const DISPLAY_ORDER = [4, 6, 2, 3, 0, 1]; // New order for display
         const WICKET_PENALTY = 15;
         const BALLS_PER_OVER = 6;
         const COMPUTER_CORRECT_RATE = 0.66;
 
-        // AI Strategies (probability distributions)
+        // AI Strategies
         const AI_STRATEGIES = {
             easy: {
                 bowler: { name: 'Monty', dist: [17, 17, 17, 16, 17, 16] },
@@ -1002,7 +1057,7 @@
             wickets: 0,
             currentOver: 0,
             ballsInOver: 0,
-            overBalls: [],
+            ballHistory: [], // Array of {runs: number, wicket: boolean}
             firstInningsScore: { runs: 0, wickets: 0 },
             secondInningsScore: { runs: 0, wickets: 0 },
             phase: 'difficulty',
@@ -1054,7 +1109,8 @@
             { q: "What is the square root of 64?", opts: ["6", "7", "8", "9"], correct: 2 },
             { q: "What is 15 + 27?", opts: ["40", "41", "42", "43"], correct: 2 },
             { q: "How many sides does a hexagon have?", opts: ["5", "6", "7", "8"], correct: 1 },
-            { q: "What is 9 × 7?", opts: ["54", "56", "63", "72"], correct: 2 }
+            { q: "What is 9 × 7?", opts: ["54", "56", "63", "72"], correct: 2 },
+            { q: "What is the capital of Spain?", opts: ["Barcelona", "Madrid", "Seville", "Valencia"], correct: 1 }
         ];
 
         // Utility Functions
@@ -1113,52 +1169,67 @@
         }
 
         function updateScoreboard() {
-            document.getElementById('playerScore').textContent = gameState.runs;
-            document.getElementById('playerWickets').textContent = `Wickets: ${gameState.wickets}`;
+            // Main score
+            document.getElementById('mainScore').textContent = `${gameState.runs} - ${gameState.wickets}`;
 
+            // Overs
             const overNum = Math.floor(gameState.ballCount / BALLS_PER_OVER);
             const ballNum = gameState.ballCount % BALLS_PER_OVER;
-            document.getElementById('overDisplay').textContent = `${overNum}.${ballNum}`;
+            document.getElementById('oversDisplay').textContent = `Overs: ${overNum}.${ballNum}`;
 
+            // Target
             if (gameState.currentInnings === 1) {
-                document.getElementById('battingLabel').textContent = 'YOU BATTING';
-                document.getElementById('targetLabel').textContent = 'TARGET';
-                document.getElementById('computerScore').textContent = '-';
-                document.getElementById('computerWickets').textContent = '';
+                document.getElementById('targetDisplay').textContent = 'Target: -';
             } else {
-                document.getElementById('battingLabel').textContent = 'COMPUTER BATTING';
-                document.getElementById('targetLabel').textContent = 'YOUR TARGET';
-                document.getElementById('computerScore').textContent = gameState.firstInningsScore.runs + 1;
-                document.getElementById('computerWickets').textContent = `You scored: ${gameState.firstInningsScore.runs}`;
+                document.getElementById('targetDisplay').textContent = `Target: ${gameState.firstInningsScore.runs + 1}`;
             }
+
+            // Update ball history displays
+            updateBallHistory();
         }
 
-        function updateOverTracker() {
-            const ballsDisplay = document.getElementById('ballsDisplay');
-            ballsDisplay.innerHTML = '';
+        function updateBallHistory() {
+            const batsmanBalls = document.getElementById('batsmanBalls');
+            const bowlerBalls = document.getElementById('bowlerBalls');
 
-            for (let i = 0; i < BALLS_PER_OVER; i++) {
-                const ball = document.createElement('div');
-                ball.className = 'ball-indicator';
+            batsmanBalls.innerHTML = '';
+            bowlerBalls.innerHTML = '';
 
-                if (i < gameState.overBalls.length) {
-                    ball.className += gameState.overBalls[i] ? ' correct' : ' wrong';
-                    ball.textContent = gameState.overBalls[i] ? '✓' : '✗';
+            // Show last 6 balls for current over
+            const startIdx = Math.max(0, gameState.ballHistory.length - 6);
+
+            for (let i = 0; i < 6; i++) {
+                const ballIdx = startIdx + i;
+                const batsmanDot = document.createElement('div');
+                const bowlerDot = document.createElement('div');
+
+                batsmanDot.className = 'ball-dot';
+                bowlerDot.className = 'ball-dot';
+
+                if (ballIdx < gameState.ballHistory.length) {
+                    const ball = gameState.ballHistory[ballIdx];
+                    if (ball.wicket) {
+                        batsmanDot.classList.add('wicket');
+                        batsmanDot.textContent = 'W';
+                        bowlerDot.classList.add('wicket');
+                        bowlerDot.textContent = 'W';
+                    } else {
+                        batsmanDot.classList.add('runs');
+                        batsmanDot.textContent = ball.runs;
+                        bowlerDot.classList.add('runs');
+                        bowlerDot.textContent = ball.runs;
+                    }
+                } else if (ballIdx === gameState.ballHistory.length && gameState.phase !== 'difficulty') {
+                    // Current ball
+                    batsmanDot.classList.add('current');
+                    batsmanDot.textContent = '?';
+                    bowlerDot.classList.add('current');
+                    bowlerDot.textContent = '?';
                 }
 
-                ballsDisplay.appendChild(ball);
+                batsmanBalls.appendChild(batsmanDot);
+                bowlerBalls.appendChild(bowlerDot);
             }
-        }
-
-        function updateInningsInfo() {
-            const info = document.getElementById('inningsInfo');
-            const role = gameState.playerBatting ? 'Batting' : 'Bowling';
-            const opponentRole = gameState.playerBatting ? 'Bowling' : 'Batting';
-            const opponentName = gameState.playerBatting
-                ? AI_STRATEGIES[gameState.difficulty].bowler.name
-                : AI_STRATEGIES[gameState.difficulty].batsman.name;
-
-            info.textContent = `Innings ${gameState.currentInnings} • You are ${role} • ${opponentName} is ${opponentRole}`;
         }
 
         function updateOversDisplay() {
@@ -1173,13 +1244,16 @@
             gameState.overs = parseInt(document.getElementById('oversSlider').value);
             gameState.totalBalls = gameState.overs * BALLS_PER_OVER;
             gameState.phase = 'question';
+
             document.body.classList.add('gameplay');
-            document.getElementById('scoreboard').classList.remove('hidden');
-            document.getElementById('overTracker').classList.remove('hidden');
-            document.getElementById('totalOvers').textContent = `of ${gameState.overs}.0`;
-            updateInningsInfo();
+            document.getElementById('welcomeHeader').classList.add('hidden');
+            document.getElementById('scorebug').classList.remove('hidden');
+
+            // Set labels
+            document.getElementById('batsmanLabel').textContent = 'Batsman';
+            document.getElementById('bowlerLabel').textContent = AI_STRATEGIES[difficulty].bowler.name;
+
             updateScoreboard();
-            updateOverTracker();
             startQuestionPhase();
         }
 
@@ -1190,6 +1264,7 @@
             gameState.availableNumbers = [...SCORING_OPTIONS];
             gameState.isNoBall = false;
             gameState.isProcessing = false;
+            gameState.phase = 'question';
 
             document.getElementById('questionText').textContent = gameState.currentQuestion.q;
 
@@ -1205,6 +1280,7 @@
             });
 
             document.getElementById('submitAnswer').disabled = true;
+            updateBallHistory();
             showScreen('questionScreen');
         }
 
@@ -1231,9 +1307,6 @@
             const playerCorrect = gameState.playerAnswer === gameState.currentQuestion.correct;
             const computerAnswerCorrect = gameState.computerAnswer === gameState.currentQuestion.correct;
 
-            gameState.overBalls.push(playerCorrect);
-            updateOverTracker();
-
             const bowlerCorrect = gameState.playerBatting ? computerAnswerCorrect : playerCorrect;
             const batsmanCorrect = gameState.playerBatting ? playerCorrect : computerAnswerCorrect;
 
@@ -1247,13 +1320,16 @@
 
             setTimeout(() => {
                 startDeliveryPhase();
-            }, 1500);
+            }, 800);
         }
 
         function startDeliveryPhase() {
             gameState.isProcessing = false;
+            gameState.phase = 'delivery';
 
-            const prompt = gameState.playerBatting ? 'Pick your runs' : 'Pick your bowling number';
+            const prompt = gameState.playerBatting
+                ? 'How many runs do you want to score?'
+                : 'Pick your bowling number';
             document.getElementById('deliveryPrompt').textContent = prompt;
 
             const numbersContainer = document.getElementById('numberOptions');
@@ -1265,7 +1341,8 @@
 
             const isLimited = playerAvailableNumbers.length === 2;
 
-            SCORING_OPTIONS.forEach(num => {
+            // Use DISPLAY_ORDER for button layout
+            DISPLAY_ORDER.forEach(num => {
                 const btn = document.createElement('button');
                 btn.className = 'number-btn';
                 btn.textContent = num;
@@ -1276,7 +1353,6 @@
                     btn.onclick = () => selectNumber(num);
                 } else {
                     btn.disabled = true;
-                    btn.title = 'Question incorrect - defend only!';
                 }
 
                 numbersContainer.appendChild(btn);
@@ -1285,8 +1361,7 @@
             if (isLimited && gameState.playerBatting) {
                 const warning = document.createElement('div');
                 warning.className = 'warning-text';
-                warning.textContent = '⚠ Question incorrect - you can only defend!';
-                warning.style.gridColumn = '1 / -1';
+                warning.textContent = 'Question incorrect - you can only defend!';
                 numbersContainer.appendChild(warning);
             }
 
@@ -1315,32 +1390,49 @@
             const numbersMatch = gameState.playerNumber === gameState.computerNumber;
             let commentary = '';
             let isWicket = false;
+            let runsScored = 0;
+
+            const batsmanNum = gameState.playerBatting ? gameState.playerNumber : gameState.computerNumber;
+            const bowlerNum = gameState.playerBatting ? gameState.computerNumber : gameState.playerNumber;
 
             if (gameState.playerBatting) {
                 if (numbersMatch && !gameState.isNoBall) {
                     isWicket = true;
                     gameState.wickets++;
                     gameState.runs = Math.max(0, gameState.runs - WICKET_PENALTY);
-                    commentary = `OUT! The bowler got you! That's a wicket and -${WICKET_PENALTY} runs penalty.`;
+                    commentary = `OUT! Bowled! -${WICKET_PENALTY} runs penalty.`;
                 } else if (numbersMatch && gameState.isNoBall) {
-                    commentary = `The numbers matched, but the no ball saves you! However, you score 0 runs.`;
+                    commentary = `No ball saves you! But you score 0 runs.`;
                 } else {
-                    gameState.runs += gameState.playerNumber;
-                    commentary = `Safe! You scored ${gameState.playerNumber} run(s).`;
+                    runsScored = gameState.playerNumber;
+                    gameState.runs += runsScored;
+                    const runWord = runsScored === 1 ? 'run' : 'runs';
+                    if (runsScored === 4) {
+                        commentary = `FOUR! ${runsScored} ${runWord} to the batsman`;
+                    } else if (runsScored === 6) {
+                        commentary = `SIX! Maximum! ${runsScored} ${runWord}`;
+                    } else {
+                        commentary = `${runsScored} ${runWord} to the batsman`;
+                    }
                 }
             } else {
                 if (numbersMatch && !gameState.isNoBall) {
                     isWicket = true;
                     gameState.wickets++;
                     gameState.runs = Math.max(0, gameState.runs - WICKET_PENALTY);
-                    commentary = `WICKET! Brilliant bowling! The computer is out! -${WICKET_PENALTY} runs from their score.`;
+                    commentary = `WICKET! Great bowling! -${WICKET_PENALTY} runs.`;
                 } else if (numbersMatch && gameState.isNoBall) {
-                    commentary = `Numbers matched but your no ball saves the computer! They score 0 runs.`;
+                    commentary = `No ball! Computer survives but scores 0.`;
                 } else {
-                    gameState.runs += gameState.computerNumber;
-                    commentary = `The computer scored ${gameState.computerNumber} run(s).`;
+                    runsScored = gameState.computerNumber;
+                    gameState.runs += runsScored;
+                    const runWord = runsScored === 1 ? 'run' : 'runs';
+                    commentary = `${runsScored} ${runWord} to the computer`;
                 }
             }
+
+            // Record ball in history
+            gameState.ballHistory.push({ runs: runsScored, wicket: isWicket });
 
             gameState.ballCount++;
             gameState.ballsInOver++;
@@ -1348,22 +1440,23 @@
             if (gameState.ballsInOver === BALLS_PER_OVER) {
                 gameState.ballsInOver = 0;
                 gameState.currentOver++;
-                gameState.overBalls = [];
             }
 
             updateScoreboard();
-            showResult(commentary, isWicket);
+            showResult(commentary, isWicket, batsmanNum, bowlerNum);
         }
 
-        function showResult(commentary, isWicket) {
-            document.getElementById('playerChoice').textContent = gameState.playerNumber;
-            document.getElementById('computerChoice').textContent = gameState.computerNumber;
+        function showResult(commentary, isWicket, batsmanNum, bowlerNum) {
+            gameState.phase = 'result';
 
-            const commentaryDiv = document.getElementById('commentary');
-            commentaryDiv.className = isWicket ? 'commentary-box wicket' : 'commentary-box';
-
-            document.getElementById('commentaryTitle').textContent = isWicket ? 'WICKET!' : 'Result';
+            // Set commentary
+            const banner = document.getElementById('commentaryBanner');
+            banner.className = isWicket ? 'commentary-banner wicket' : 'commentary-banner';
             document.getElementById('commentaryText').textContent = commentary;
+
+            // Set numbers
+            document.getElementById('batsmanNumber').textContent = batsmanNum;
+            document.getElementById('bowlerNumber').textContent = bowlerNum;
 
             showScreen('resultScreen');
         }
@@ -1390,11 +1483,13 @@
                 gameState.wickets = 0;
                 gameState.currentOver = 0;
                 gameState.ballsInOver = 0;
-                gameState.overBalls = [];
+                gameState.ballHistory = [];
 
-                updateInningsInfo();
+                // Update labels for bowling
+                document.getElementById('batsmanLabel').textContent = AI_STRATEGIES[gameState.difficulty].batsman.name;
+                document.getElementById('bowlerLabel').textContent = 'Bowler';
+
                 updateScoreboard();
-                updateOverTracker();
 
                 alert(`First innings complete! You scored ${gameState.firstInningsScore.runs} runs.\n\nNow you're bowling!`);
 
@@ -1410,6 +1505,8 @@
         }
 
         function showSummary() {
+            gameState.phase = 'summary';
+
             const playerScore = gameState.firstInningsScore.runs;
             const computerScore = gameState.secondInningsScore.runs;
 
@@ -1436,6 +1533,7 @@
                 winnerDiv.innerHTML = `It's a Tie!<small>vs ${bowlerName} & ${batsmanName}</small>`;
             }
 
+            document.getElementById('scorebug').classList.add('hidden');
             showScreen('summaryScreen');
         }
 
@@ -1451,7 +1549,7 @@
                 wickets: 0,
                 currentOver: 0,
                 ballsInOver: 0,
-                overBalls: [],
+                ballHistory: [],
                 firstInningsScore: { runs: 0, wickets: 0 },
                 secondInningsScore: { runs: 0, wickets: 0 },
                 phase: 'difficulty',
@@ -1467,9 +1565,8 @@
             };
 
             document.body.classList.remove('gameplay');
-            document.getElementById('scoreboard').classList.add('hidden');
-            document.getElementById('overTracker').classList.add('hidden');
-            document.getElementById('inningsInfo').textContent = 'Select Difficulty to Begin';
+            document.getElementById('welcomeHeader').classList.remove('hidden');
+            document.getElementById('scorebug').classList.add('hidden');
             document.getElementById('oversSlider').value = 3;
             updateOversDisplay();
 
