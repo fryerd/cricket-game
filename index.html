@@ -18,7 +18,12 @@
             --cream: #F5E6C8;
             --wicket-red: #dc3545;
             --success-green: #28a745;
+            --question-wrong: #FF6B35;
+            --question-right: #28a745;
             --ball-current: #17a2b8;
+            --pitch-beige: #d4b896;
+            --grass-light: #4a9c2d;
+            --grass-dark: #3d8526;
         }
 
         * {
@@ -47,14 +52,14 @@
                 0deg,
                 transparent,
                 transparent 2px,
-                rgba(0,0,0,0.1) 2px,
-                rgba(0,0,0,0.1) 4px
+                rgba(0,0,0,0.08) 2px,
+                rgba(0,0,0,0.08) 4px
             );
             pointer-events: none;
             z-index: 1000;
         }
 
-        /* Animated background */
+        /* Animated background for welcome */
         .bg-stripes {
             position: fixed;
             top: 0;
@@ -99,19 +104,138 @@
             opacity: 0;
         }
 
-        body.gameplay {
-            background: #e8e8e8;
-            background-image: radial-gradient(circle, #ccc 1px, transparent 1px);
-            background-size: 20px 20px;
+        /* Cricket Pitch POV Background */
+        .cricket-pitch-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            overflow: hidden;
+        }
+
+        body.gameplay .cricket-pitch-bg {
+            opacity: 1;
+        }
+
+        /* Sky */
+        .pitch-sky {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 35%;
+            background: linear-gradient(180deg, #87CEEB 0%, #b4dff0 100%);
+        }
+
+        /* Clouds */
+        .cloud {
+            position: absolute;
+            background: rgba(255,255,255,0.9);
+            border-radius: 50px;
+        }
+        .cloud-1 { width: 120px; height: 40px; top: 8%; left: 10%; }
+        .cloud-2 { width: 100px; height: 35px; top: 12%; left: 60%; }
+        .cloud-3 { width: 80px; height: 30px; top: 5%; left: 35%; }
+
+        /* Stadium/Stands hint */
+        .pitch-stands {
+            position: absolute;
+            top: 30%;
+            left: 0;
+            right: 0;
+            height: 15%;
+            background: linear-gradient(180deg, #5a6a7a 0%, #4a5a6a 100%);
+        }
+
+        /* Grass field with perspective */
+        .pitch-grass {
+            position: absolute;
+            top: 40%;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                repeating-linear-gradient(
+                    90deg,
+                    var(--grass-light) 0px,
+                    var(--grass-light) 40px,
+                    var(--grass-dark) 40px,
+                    var(--grass-dark) 80px
+                );
+            transform: perspective(500px) rotateX(25deg);
+            transform-origin: top center;
+        }
+
+        /* The pitch strip */
+        .pitch-strip {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 15%;
+            height: 55%;
+            background: linear-gradient(180deg,
+                var(--pitch-beige) 0%,
+                #c4a886 50%,
+                #b49876 100%
+            );
+            clip-path: polygon(35% 0%, 65% 0%, 100% 100%, 0% 100%);
+        }
+
+        /* Crease lines */
+        .pitch-crease {
+            position: absolute;
+            bottom: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12%;
+            height: 3px;
+            background: white;
+        }
+
+        /* Stumps */
+        .pitch-stumps {
+            position: absolute;
+            bottom: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 3px;
+        }
+
+        .stump {
+            width: 4px;
+            height: 30px;
+            background: linear-gradient(90deg, #d4a574, #c49564);
+            border-radius: 1px;
+        }
+
+        .bails {
+            position: absolute;
+            top: -4px;
+            left: -2px;
+            right: -2px;
+            height: 4px;
+            background: #d4a574;
+            border-radius: 2px;
         }
 
         .container {
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            padding-top: 140px; /* Space for fixed scorebug */
             position: relative;
             z-index: 1;
             min-height: 100vh;
+        }
+
+        body:not(.gameplay) .container {
+            padding-top: 20px;
         }
 
         /* Welcome Header */
@@ -145,39 +269,42 @@
             box-shadow: 4px 4px 0 var(--warm-brown);
         }
 
-        /* ========== NEW SCOREBUG ========== */
+        /* ========== FIXED SCOREBUG ========== */
         .scorebug {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 500;
             background: linear-gradient(180deg, #3a3a3a, #2a2a2a);
-            border: 4px solid var(--crt-black);
-            border-radius: 8px;
-            padding: 12px 20px;
-            margin-bottom: 20px;
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border-bottom: 4px solid var(--crt-black);
+            display: flex;
+            align-items: stretch;
+            min-height: 120px;
         }
 
         .scorebug-side {
+            flex: 1;
             display: flex;
-            align-items: center;
-            gap: 10px;
+            flex-direction: column;
+            padding: 10px 15px;
+            justify-content: center;
+        }
+
+        .scorebug-side.left {
+            align-items: flex-start;
         }
 
         .scorebug-side.right {
-            justify-content: flex-end;
-        }
-
-        .player-avatar {
-            font-size: 1.8rem;
+            align-items: flex-end;
         }
 
         .player-label {
             font-family: 'Fredoka', sans-serif;
-            font-size: 0.9rem;
+            font-size: 1rem;
             font-weight: 600;
             color: #ddd;
+            margin-bottom: 8px;
         }
 
         .ball-history {
@@ -186,28 +313,28 @@
         }
 
         .ball-dot {
-            width: 28px;
-            height: 28px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             background: #555;
             border: 2px solid #666;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-weight: 700;
             color: #888;
         }
 
-        .ball-dot.runs {
-            background: var(--success-green);
+        .ball-dot.correct {
+            background: var(--question-right);
             border-color: #1e7e34;
             color: white;
         }
 
-        .ball-dot.wicket {
-            background: var(--wicket-red);
-            border-color: #bd2130;
+        .ball-dot.wrong {
+            background: var(--question-wrong);
+            border-color: #cc5529;
             color: white;
         }
 
@@ -217,36 +344,52 @@
             color: white;
         }
 
+        /* Center score section - thicker with angled sides */
         .scorebug-center {
-            text-align: center;
+            background: linear-gradient(180deg, #2a2a2a, #1a1a1a);
+            padding: 10px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             position: relative;
+            min-width: 200px;
         }
 
+        /* Angled dividers */
         .scorebug-center::before,
         .scorebug-center::after {
             content: '';
             position: absolute;
-            top: -12px;
-            bottom: -12px;
-            width: 4px;
-            background: var(--crt-black);
+            top: 0;
+            bottom: 0;
+            width: 30px;
+            background: linear-gradient(180deg, #2a2a2a, #1a1a1a);
         }
 
         .scorebug-center::before {
-            left: -20px;
-            clip-path: polygon(0 20%, 100% 0, 100% 100%, 0 80%);
+            left: -15px;
+            clip-path: polygon(100% 0, 100% 100%, 0 100%, 50% 0);
         }
 
         .scorebug-center::after {
-            right: -20px;
-            clip-path: polygon(0 0, 100% 20%, 100% 80%, 0 100%);
+            right: -15px;
+            clip-path: polygon(0 0, 50% 0, 100% 100%, 0 100%);
         }
 
         .main-score {
             font-family: 'Anton', sans-serif;
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             color: white;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
+            line-height: 1;
+        }
+
+        .score-balls {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 0.85rem;
+            color: #aaa;
+            margin-top: 4px;
         }
 
         .score-details {
@@ -254,8 +397,8 @@
             justify-content: center;
             gap: 20px;
             font-size: 0.8rem;
-            color: #aaa;
-            margin-top: 2px;
+            color: #888;
+            margin-top: 6px;
         }
 
         /* ========== PROGRESS BAR ========== */
@@ -263,7 +406,6 @@
             display: flex;
             height: 8px;
             background: #ddd;
-            border-radius: 0;
             overflow: hidden;
             margin-bottom: 0;
         }
@@ -288,11 +430,11 @@
 
         /* ========== GAME PANEL ========== */
         .game-panel {
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
             border: 4px solid var(--crt-black);
             position: relative;
             padding: 25px;
-            box-shadow: 6px 6px 0 rgba(0,0,0,0.2);
+            box-shadow: 6px 6px 0 rgba(0,0,0,0.3);
         }
 
         .game-panel.welcome {
@@ -403,9 +545,7 @@
             align-items: center;
         }
 
-        .diff-btn:hover {
-            transform: translate(-3px, -3px);
-        }
+        .diff-btn:hover { transform: translate(-3px, -3px); }
 
         .diff-easy {
             background: linear-gradient(180deg, var(--pakistan-green), var(--pakistan-green-dark));
@@ -413,7 +553,6 @@
             border: 4px solid var(--bh-gold);
             box-shadow: 5px 5px 0 var(--warm-brown);
         }
-
         .diff-easy:hover { box-shadow: 8px 8px 0 var(--warm-brown); }
 
         .diff-medium {
@@ -422,7 +561,6 @@
             border: 4px solid var(--bh-gold);
             box-shadow: 5px 5px 0 var(--warm-brown);
         }
-
         .diff-medium:hover { box-shadow: 8px 8px 0 var(--warm-brown); }
 
         .diff-hard {
@@ -431,7 +569,6 @@
             border: 4px solid var(--bh-gold);
             box-shadow: 5px 5px 0 var(--warm-brown);
         }
-
         .diff-hard:hover { box-shadow: 8px 8px 0 var(--warm-brown); }
 
         .opponent-names {
@@ -483,7 +620,6 @@
         .option-btn.selected {
             background: var(--electric-teal);
             color: white;
-            border-color: var(--crt-black);
         }
 
         .submit-btn {
@@ -523,7 +659,7 @@
             font-family: 'Fredoka', sans-serif;
             font-size: 1.3rem;
             font-weight: 600;
-            color: #666;
+            color: #555;
             text-align: center;
             margin-bottom: 25px;
         }
@@ -579,7 +715,7 @@
             grid-column: 1 / -1;
         }
 
-        /* ========== RESULT/REVEAL SCREEN ========== */
+        /* ========== RESULT SCREEN ========== */
         .commentary-banner {
             background: linear-gradient(180deg, #d4edfc, #b8e0f7);
             border: 3px solid var(--electric-teal);
@@ -619,9 +755,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.5rem;
             margin-bottom: 10px;
-            transition: all 0.3s ease;
         }
 
         .reveal-circle.batsman {
@@ -636,6 +770,7 @@
 
         .reveal-circle .number {
             font-family: 'Anton', sans-serif;
+            font-size: 2.5rem;
             color: var(--crt-black);
         }
 
@@ -824,18 +959,29 @@
 
         /* Mobile adjustments */
         @media (max-width: 600px) {
-            .title-main {
-                font-size: 2rem;
-            }
+            .title-main { font-size: 2rem; }
 
             .scorebug {
-                grid-template-columns: 1fr;
-                gap: 10px;
-                padding: 10px;
+                min-height: 100px;
+                flex-direction: column;
             }
 
             .scorebug-side {
-                justify-content: center;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+                padding: 5px 10px;
+            }
+
+            .scorebug-side.left,
+            .scorebug-side.right {
+                align-items: center;
+            }
+
+            .scorebug-center {
+                padding: 8px 20px;
+                min-width: auto;
             }
 
             .scorebug-center::before,
@@ -844,13 +990,15 @@
             }
 
             .ball-dot {
-                width: 24px;
-                height: 24px;
-                font-size: 0.6rem;
+                width: 26px;
+                height: 26px;
+                font-size: 0.7rem;
             }
 
-            .main-score {
-                font-size: 2rem;
+            .main-score { font-size: 1.8rem; }
+
+            .container {
+                padding-top: 160px;
             }
 
             .number-btn {
@@ -861,12 +1009,13 @@
             .reveal-circle {
                 width: 80px;
                 height: 80px;
+            }
+
+            .reveal-circle .number {
                 font-size: 2rem;
             }
 
-            .result-reveal {
-                gap: 25px;
-            }
+            .result-reveal { gap: 25px; }
 
             .corner-deco {
                 width: 50px;
@@ -881,32 +1030,50 @@
     <div class="corner-deco top-left"></div>
     <div class="corner-deco top-right"></div>
 
+    <!-- Cricket Pitch Background -->
+    <div class="cricket-pitch-bg">
+        <div class="pitch-sky">
+            <div class="cloud cloud-1"></div>
+            <div class="cloud cloud-2"></div>
+            <div class="cloud cloud-3"></div>
+        </div>
+        <div class="pitch-stands"></div>
+        <div class="pitch-grass"></div>
+        <div class="pitch-strip"></div>
+        <div class="pitch-crease"></div>
+        <div class="pitch-stumps">
+            <div class="stump"></div>
+            <div class="stump"></div>
+            <div class="stump"></div>
+            <div class="bails"></div>
+        </div>
+    </div>
+
+    <!-- Fixed Scorebug -->
+    <div class="scorebug hidden" id="scorebug">
+        <div class="scorebug-side left">
+            <span class="player-label" id="batsmanLabel">Batsman</span>
+            <div class="ball-history" id="batsmanBalls"></div>
+        </div>
+        <div class="scorebug-center">
+            <div class="main-score" id="mainScore">0 runs</div>
+            <div class="score-balls" id="scoreBalls">(0 balls)</div>
+            <div class="score-details">
+                <span id="wicketsDisplay">Wickets: 0</span>
+                <span id="oversDisplay">Overs: 0.0</span>
+            </div>
+        </div>
+        <div class="scorebug-side right">
+            <div class="ball-history" id="bowlerBalls"></div>
+            <span class="player-label" id="bowlerLabel">Bowler</span>
+        </div>
+    </div>
+
     <div class="container">
-        <!-- Welcome Header (only on difficulty screen) -->
+        <!-- Welcome Header -->
         <div class="header" id="welcomeHeader">
             <h1 class="title-main">Cricket Quiz</h1>
             <div class="innings-bar" id="inningsInfo">Select Difficulty to Begin</div>
-        </div>
-
-        <!-- Scorebug (during gameplay) -->
-        <div class="scorebug hidden" id="scorebug">
-            <div class="scorebug-side">
-                <span class="player-avatar" id="batsmanAvatar">🧑</span>
-                <span class="player-label" id="batsmanLabel">Batsman</span>
-                <div class="ball-history" id="batsmanBalls"></div>
-            </div>
-            <div class="scorebug-center">
-                <div class="main-score" id="mainScore">0 - 0</div>
-                <div class="score-details">
-                    <span id="targetDisplay">Target: -</span>
-                    <span id="oversDisplay">Overs: 0.0</span>
-                </div>
-            </div>
-            <div class="scorebug-side right">
-                <div class="ball-history" id="bowlerBalls"></div>
-                <span class="player-label" id="bowlerLabel">Bowler</span>
-                <span class="player-avatar" id="bowlerAvatar">🧑</span>
-            </div>
         </div>
 
         <!-- Game Content -->
@@ -940,8 +1107,8 @@
             <!-- Question Phase -->
             <div class="game-panel hidden" id="questionScreen">
                 <div class="progress-bar">
-                    <div class="progress-segment active" id="progressQuestion"></div>
-                    <div class="progress-segment" id="progressDelivery"></div>
+                    <div class="progress-segment active"></div>
+                    <div class="progress-segment"></div>
                 </div>
                 <div style="padding-top: 20px;">
                     <div class="question-text" id="questionText"></div>
@@ -976,13 +1143,13 @@
                     </div>
                     <div class="result-reveal">
                         <div class="reveal-player">
-                            <div class="reveal-circle batsman" id="revealBatsman">
+                            <div class="reveal-circle batsman">
                                 <span class="number" id="batsmanNumber"></span>
                             </div>
                             <div class="reveal-label">Batsman</div>
                         </div>
                         <div class="reveal-player">
-                            <div class="reveal-circle bowler" id="revealBowler">
+                            <div class="reveal-circle bowler">
                                 <span class="number" id="bowlerNumber"></span>
                             </div>
                             <div class="reveal-label">Bowler</div>
@@ -994,7 +1161,7 @@
 
             <!-- Summary Screen -->
             <div class="game-panel welcome hidden" id="summaryScreen">
-                <div class="summary-title" id="summaryTitle">Match Complete!</div>
+                <div class="summary-title">Match Complete!</div>
 
                 <div class="innings-summary">
                     <h3>First Innings (You Batting)</h3>
@@ -1024,7 +1191,7 @@
     <script>
         // Game Constants
         const SCORING_OPTIONS = [0, 1, 2, 3, 4, 6];
-        const DISPLAY_ORDER = [4, 6, 2, 3, 0, 1]; // New order for display
+        const DISPLAY_ORDER = [4, 6, 2, 3, 0, 1];
         const WICKET_PENALTY = 15;
         const BALLS_PER_OVER = 6;
         const COMPUTER_CORRECT_RATE = 0.66;
@@ -1057,7 +1224,8 @@
             wickets: 0,
             currentOver: 0,
             ballsInOver: 0,
-            ballHistory: [], // Array of {runs: number, wicket: boolean}
+            // Ball history: {questionCorrect: bool, numberChosen: number, wicket: bool}
+            ballHistory: [],
             firstInningsScore: { runs: 0, wickets: 0 },
             secondInningsScore: { runs: 0, wickets: 0 },
             phase: 'difficulty',
@@ -1069,7 +1237,8 @@
             availableNumbers: [...SCORING_OPTIONS],
             isNoBall: false,
             usedQuestions: [],
-            isProcessing: false
+            isProcessing: false,
+            lastPlayerCorrect: false
         };
 
         // Question Pool
@@ -1169,22 +1338,20 @@
         }
 
         function updateScoreboard() {
-            // Main score
-            document.getElementById('mainScore').textContent = `${gameState.runs} - ${gameState.wickets}`;
+            // Main score format: "X runs"
+            document.getElementById('mainScore').textContent = `${gameState.runs} runs`;
+
+            // Balls played
+            document.getElementById('scoreBalls').textContent = `(${gameState.ballCount} balls)`;
+
+            // Wickets
+            document.getElementById('wicketsDisplay').textContent = `Wickets: ${gameState.wickets}`;
 
             // Overs
             const overNum = Math.floor(gameState.ballCount / BALLS_PER_OVER);
             const ballNum = gameState.ballCount % BALLS_PER_OVER;
             document.getElementById('oversDisplay').textContent = `Overs: ${overNum}.${ballNum}`;
 
-            // Target
-            if (gameState.currentInnings === 1) {
-                document.getElementById('targetDisplay').textContent = 'Target: -';
-            } else {
-                document.getElementById('targetDisplay').textContent = `Target: ${gameState.firstInningsScore.runs + 1}`;
-            }
-
-            // Update ball history displays
             updateBallHistory();
         }
 
@@ -1195,7 +1362,7 @@
             batsmanBalls.innerHTML = '';
             bowlerBalls.innerHTML = '';
 
-            // Show last 6 balls for current over
+            // Show last 6 balls
             const startIdx = Math.max(0, gameState.ballHistory.length - 6);
 
             for (let i = 0; i < 6; i++) {
@@ -1208,19 +1375,21 @@
 
                 if (ballIdx < gameState.ballHistory.length) {
                     const ball = gameState.ballHistory[ballIdx];
-                    if (ball.wicket) {
-                        batsmanDot.classList.add('wicket');
-                        batsmanDot.textContent = 'W';
-                        bowlerDot.classList.add('wicket');
-                        bowlerDot.textContent = 'W';
+
+                    // Color based on question correctness
+                    if (ball.questionCorrect) {
+                        batsmanDot.classList.add('correct');
+                        bowlerDot.classList.add('correct');
                     } else {
-                        batsmanDot.classList.add('runs');
-                        batsmanDot.textContent = ball.runs;
-                        bowlerDot.classList.add('runs');
-                        bowlerDot.textContent = ball.runs;
+                        batsmanDot.classList.add('wrong');
+                        bowlerDot.classList.add('wrong');
                     }
+
+                    // Content: W for wicket, number otherwise
+                    const content = ball.wicket ? 'W' : ball.numberChosen;
+                    batsmanDot.textContent = content;
+                    bowlerDot.textContent = content;
                 } else if (ballIdx === gameState.ballHistory.length && gameState.phase !== 'difficulty') {
-                    // Current ball
                     batsmanDot.classList.add('current');
                     batsmanDot.textContent = '?';
                     bowlerDot.classList.add('current');
@@ -1307,6 +1476,9 @@
             const playerCorrect = gameState.playerAnswer === gameState.currentQuestion.correct;
             const computerAnswerCorrect = gameState.computerAnswer === gameState.currentQuestion.correct;
 
+            // Store whether player got question correct for ball history
+            gameState.lastPlayerCorrect = playerCorrect;
+
             const bowlerCorrect = gameState.playerBatting ? computerAnswerCorrect : playerCorrect;
             const batsmanCorrect = gameState.playerBatting ? playerCorrect : computerAnswerCorrect;
 
@@ -1341,7 +1513,6 @@
 
             const isLimited = playerAvailableNumbers.length === 2;
 
-            // Use DISPLAY_ORDER for button layout
             DISPLAY_ORDER.forEach(num => {
                 const btn = document.createElement('button');
                 btn.className = 'number-btn';
@@ -1394,6 +1565,7 @@
 
             const batsmanNum = gameState.playerBatting ? gameState.playerNumber : gameState.computerNumber;
             const bowlerNum = gameState.playerBatting ? gameState.computerNumber : gameState.playerNumber;
+            const playerNumberChosen = gameState.playerNumber;
 
             if (gameState.playerBatting) {
                 if (numbersMatch && !gameState.isNoBall) {
@@ -1431,8 +1603,12 @@
                 }
             }
 
-            // Record ball in history
-            gameState.ballHistory.push({ runs: runsScored, wicket: isWicket });
+            // Record ball in history with question correctness and number chosen
+            gameState.ballHistory.push({
+                questionCorrect: gameState.lastPlayerCorrect,
+                numberChosen: playerNumberChosen,
+                wicket: isWicket
+            });
 
             gameState.ballCount++;
             gameState.ballsInOver++;
@@ -1449,12 +1625,10 @@
         function showResult(commentary, isWicket, batsmanNum, bowlerNum) {
             gameState.phase = 'result';
 
-            // Set commentary
             const banner = document.getElementById('commentaryBanner');
             banner.className = isWicket ? 'commentary-banner wicket' : 'commentary-banner';
             document.getElementById('commentaryText').textContent = commentary;
 
-            // Set numbers
             document.getElementById('batsmanNumber').textContent = batsmanNum;
             document.getElementById('bowlerNumber').textContent = bowlerNum;
 
@@ -1485,7 +1659,6 @@
                 gameState.ballsInOver = 0;
                 gameState.ballHistory = [];
 
-                // Update labels for bowling
                 document.getElementById('batsmanLabel').textContent = AI_STRATEGIES[gameState.difficulty].batsman.name;
                 document.getElementById('bowlerLabel').textContent = 'Bowler';
 
@@ -1561,7 +1734,8 @@
                 availableNumbers: [...SCORING_OPTIONS],
                 isNoBall: false,
                 usedQuestions: [],
-                isProcessing: false
+                isProcessing: false,
+                lastPlayerCorrect: false
             };
 
             document.body.classList.remove('gameplay');
