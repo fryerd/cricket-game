@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Quiz Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            max-width: 800px;
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #2c5f2d;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .innings-info {
+            background: #1e4620;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        .scoreboard {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background: #f5f5f5;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .score-box {
+            text-align: center;
+            flex: 1;
+        }
+
+        .score-box h3 {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .score-box .score {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c5f2d;
+        }
+
+        .score-box .detail {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .over-tracker {
+            padding: 15px 20px;
+            background: #fafafa;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .over-tracker .balls {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .ball-indicator {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        .ball-indicator.correct {
+            background: #4caf50;
+            color: white;
+        }
+
+        .ball-indicator.wrong {
+            background: #f44336;
+            color: white;
+        }
+
+        .content {
+            padding: 30px;
+            min-height: 400px;
+        }
+
+        /* Difficulty Selection */
+        .difficulty-screen {
+            text-align: center;
+        }
+
+        .difficulty-screen h2 {
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .overs-selector {
+            max-width: 400px;
+            margin: 0 auto 30px auto;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .overs-selector h3 {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .overs-selector .overs-value {
+            font-size: 1.5rem;
+            color: #2c5f2d;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .overs-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .overs-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #2c5f2d;
+            cursor: pointer;
+        }
+
+        .overs-slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #2c5f2d;
+            cursor: pointer;
+            border: none;
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .difficulty-btn {
+            padding: 20px;
+            font-size: 1.2rem;
+            background: #2c5f2d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .difficulty-btn:hover {
+            background: #1e4620;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .difficulty-btn .subtitle {
+            display: block;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            opacity: 0.9;
+        }
+
+        /* Question Phase */
+        .question-screen h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            line-height: 1.5;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .option-btn {
+            padding: 15px 20px;
+            font-size: 1rem;
+            text-align: left;
+            background: #f0f0f0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover {
+            background: #e0e0e0;
+            border-color: #2c5f2d;
+        }
+
+        .option-btn.selected {
+            background: #2c5f2d;
+            color: white;
+            border-color: #2c5f2d;
+        }
+
+        .submit-btn {
+            margin-top: 20px;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            background: #2c5f2d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: #1e4620;
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Delivery Phase */
+        .delivery-screen {
+            text-align: center;
+        }
+
+        .delivery-screen h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .number-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            max-width: 400px;
+            margin: 30px auto;
+        }
+
+        .number-btn {
+            padding: 30px;
+            font-size: 2rem;
+            font-weight: bold;
+            background: #2c5f2d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .number-btn:hover {
+            background: #1e4620;
+            transform: scale(1.05);
+        }
+
+        /* Result Phase */
+        .result-screen {
+            text-align: center;
+        }
+
+        .result-reveal {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+        }
+
+        .player-choice, .computer-choice {
+            text-align: center;
+        }
+
+        .player-choice h3, .computer-choice h3 {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .choice-number {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #2c5f2d;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0 auto;
+        }
+
+        .commentary {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .commentary h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .commentary p {
+            color: #856404;
+            line-height: 1.6;
+        }
+
+        .wicket-commentary {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+
+        .wicket-commentary h3,
+        .wicket-commentary p {
+            color: #721c24;
+        }
+
+        .next-btn {
+            margin-top: 20px;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            background: #2c5f2d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .next-btn:hover {
+            background: #1e4620;
+        }
+
+        /* Summary Screen */
+        .summary-screen {
+            text-align: center;
+        }
+
+        .summary-screen h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: #2c5f2d;
+        }
+
+        .innings-summary {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .innings-summary h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .score-line {
+            font-size: 1.5rem;
+            margin: 10px 0;
+            color: #2c5f2d;
+            font-weight: bold;
+        }
+
+        .restart-btn {
+            margin-top: 30px;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            background: #2c5f2d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .restart-btn:hover {
+            background: #1e4620;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏏 Cricket Quiz Game</h1>
+            <div class="innings-info" id="inningsInfo">
+                Select Difficulty to Begin
+            </div>
+        </div>
+
+        <div class="scoreboard" id="scoreboard" style="display: none;">
+            <div class="score-box">
+                <h3>YOUR SCORE</h3>
+                <div class="score" id="playerScore">0</div>
+                <div class="detail" id="playerWickets">Wickets: 0</div>
+            </div>
+            <div class="score-box">
+                <h3>OVERS</h3>
+                <div class="score" id="overDisplay">0.0</div>
+                <div class="detail" id="totalOvers">of 3.0</div>
+            </div>
+            <div class="score-box">
+                <h3>COMPUTER</h3>
+                <div class="score" id="computerScore">0</div>
+                <div class="detail" id="computerWickets">Wickets: 0</div>
+            </div>
+        </div>
+
+        <div class="over-tracker" id="overTracker" style="display: none;">
+            <strong>This Over:</strong>
+            <div class="balls" id="ballsDisplay"></div>
+        </div>
+
+        <div class="content" id="gameContent">
+            <!-- Difficulty Selection -->
+            <div class="difficulty-screen" id="difficultyScreen">
+                <h2>Select Difficulty</h2>
+                <div class="overs-selector">
+                    <h3>Game Duration</h3>
+                    <div class="overs-value" id="oversValue">3 Overs</div>
+                    <input type="range" min="1" max="5" value="3" class="overs-slider" id="oversSlider" oninput="updateOversDisplay()">
+                </div>
+                <div class="difficulty-buttons">
+                    <button class="difficulty-btn" onclick="selectDifficulty('easy')">
+                        Easy
+                        <span class="subtitle">vs Monty & Grace</span>
+                    </button>
+                    <button class="difficulty-btn" onclick="selectDifficulty('medium')">
+                        Medium
+                        <span class="subtitle">vs Kumble & Gavaskar</span>
+                    </button>
+                    <button class="difficulty-btn" onclick="selectDifficulty('hard')">
+                        Hard
+                        <span class="subtitle">vs Warne & Bradman</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Question Phase -->
+            <div class="question-screen hidden" id="questionScreen">
+                <h2 id="questionText"></h2>
+                <div class="options" id="questionOptions"></div>
+                <button class="submit-btn" id="submitAnswer" onclick="submitAnswer()" disabled>
+                    Submit Answer
+                </button>
+            </div>
+
+            <!-- Delivery Phase -->
+            <div class="delivery-screen hidden" id="deliveryScreen">
+                <h2 id="deliveryPrompt">Pick your number</h2>
+                <div class="number-options" id="numberOptions"></div>
+            </div>
+
+            <!-- Result Phase -->
+            <div class="result-screen hidden" id="resultScreen">
+                <div class="result-reveal">
+                    <div class="player-choice">
+                        <h3>You chose</h3>
+                        <div class="choice-number" id="playerChoice">0</div>
+                    </div>
+                    <div class="computer-choice">
+                        <h3>Computer chose</h3>
+                        <div class="choice-number" id="computerChoice">0</div>
+                    </div>
+                </div>
+                <div class="commentary" id="commentary">
+                    <h3 id="commentaryTitle">Result</h3>
+                    <p id="commentaryText"></p>
+                </div>
+                <button class="next-btn" onclick="nextBall()">Next Ball</button>
+            </div>
+
+            <!-- Summary Screen -->
+            <div class="summary-screen hidden" id="summaryScreen">
+                <h2 id="summaryTitle">Match Complete!</h2>
+                <div class="innings-summary">
+                    <h3>First Innings (You Batting)</h3>
+                    <div class="score-line" id="firstInningsScore">0 runs</div>
+                    <div class="detail" id="firstInningsWickets">0 wickets</div>
+                </div>
+                <div class="innings-summary">
+                    <h3>Second Innings (You Bowling)</h3>
+                    <div class="score-line" id="secondInningsScore">0 runs</div>
+                    <div class="detail" id="secondInningsWickets">0 wickets</div>
+                </div>
+                <div id="winnerMessage" style="font-size: 1.5rem; margin: 20px 0; font-weight: bold;"></div>
+                <button class="restart-btn" onclick="restartGame()">Start New Match</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game Constants
+        const SCORING_OPTIONS = [0, 1, 2, 3, 4, 6];
+        const WICKET_PENALTY = 15;
+        const BALLS_PER_OVER = 6;
+        const COMPUTER_CORRECT_RATE = 0.66;
+
+        // AI Strategies (probability distributions)
+        const AI_STRATEGIES = {
+            easy: {
+                bowler: { name: 'Monty', dist: [17, 17, 17, 16, 17, 16] },
+                batsman: { name: 'Grace', dist: [5, 8, 13, 20, 28, 26] }
+            },
+            medium: {
+                bowler: { name: 'Kumble', dist: [18, 15, 15, 16, 18, 18] },
+                batsman: { name: 'Gavaskar', dist: [3, 5, 9, 18, 32, 33] }
+            },
+            hard: {
+                bowler: { name: 'Warne', dist: [12, 10, 12, 14, 23, 29] },
+                batsman: { name: 'Bradman', dist: [2, 4, 7, 15, 32, 40] }
+            }
+        };
+
+        // Game State
+        let gameState = {
+            difficulty: null,
+            overs: 3,
+            totalBalls: 18,
+            currentInnings: 1,
+            playerBatting: true,
+            ballCount: 0,
+            runs: 0,
+            wickets: 0,
+            currentOver: 0,
+            ballsInOver: 0,
+            overBalls: [],
+            firstInningsScore: { runs: 0, wickets: 0 },
+            secondInningsScore: { runs: 0, wickets: 0 },
+            phase: 'difficulty', // difficulty, question, delivery, result, summary
+            currentQuestion: null,
+            playerAnswer: null,
+            computerAnswer: null,
+            playerNumber: null,
+            computerNumber: null,
+            availableNumbers: [...SCORING_OPTIONS],
+            isNoBall: false
+        };
+
+        // Question Pool
+        const questions = [
+            // Geography
+            { q: "What is the capital of France?", opts: ["Paris", "London", "Berlin", "Madrid"], correct: 0 },
+            { q: "Which river flows through Egypt?", opts: ["Amazon", "Nile", "Thames", "Ganges"], correct: 1 },
+            { q: "What is the largest ocean?", opts: ["Atlantic", "Indian", "Pacific", "Arctic"], correct: 2 },
+            { q: "Which country has the most people?", opts: ["USA", "India", "China", "Russia"], correct: 2 },
+            { q: "What is the capital of Japan?", opts: ["Seoul", "Beijing", "Tokyo", "Bangkok"], correct: 2 },
+            { q: "Which mountain is the tallest?", opts: ["K2", "Mount Everest", "Kilimanjaro", "Denali"], correct: 1 },
+            { q: "What is the capital of Australia?", opts: ["Sydney", "Melbourne", "Canberra", "Perth"], correct: 2 },
+            { q: "Which continent is the Sahara Desert in?", opts: ["Asia", "Africa", "Australia", "South America"], correct: 1 },
+            { q: "What ocean is west of the USA?", opts: ["Atlantic", "Pacific", "Arctic", "Indian"], correct: 1 },
+            { q: "Which country is shaped like a boot?", opts: ["Spain", "Greece", "Italy", "Portugal"], correct: 2 },
+            { q: "What is the smallest continent?", opts: ["Europe", "Antarctica", "Australia", "South America"], correct: 2 },
+            { q: "Which city is called the Big Apple?", opts: ["Los Angeles", "Chicago", "New York", "Boston"], correct: 2 },
+
+            // Science
+            { q: "What gas do plants need for photosynthesis?", opts: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"], correct: 2 },
+            { q: "What is the smallest unit of life?", opts: ["Atom", "Cell", "Molecule", "Tissue"], correct: 1 },
+            { q: "How many bones does an adult human have?", opts: ["186", "206", "226", "246"], correct: 1 },
+            { q: "What is H2O?", opts: ["Oxygen", "Hydrogen", "Water", "Salt"], correct: 2 },
+            { q: "What planet is closest to the Sun?", opts: ["Venus", "Mars", "Mercury", "Earth"], correct: 2 },
+            { q: "What force keeps us on Earth?", opts: ["Magnetism", "Electricity", "Gravity", "Friction"], correct: 2 },
+
+            // Sports
+            { q: "How many players on a basketball team (on court)?", opts: ["4", "5", "6", "7"], correct: 1 },
+            { q: "What sport is played at Wimbledon?", opts: ["Cricket", "Tennis", "Golf", "Rugby"], correct: 1 },
+            { q: "How many players on a football team?", opts: ["9", "10", "11", "12"], correct: 2 },
+            { q: "What color are the goalposts in rugby?", opts: ["Yellow", "White", "Red", "Blue"], correct: 1 },
+            { q: "How many Olympic rings are there?", opts: ["4", "5", "6", "7"], correct: 1 },
+            { q: "In cricket, how many stumps are there?", opts: ["2", "3", "4", "5"], correct: 1 },
+
+            // History
+            { q: "Who wrote Romeo and Juliet?", opts: ["Dickens", "Shakespeare", "Austen", "Tolkien"], correct: 1 },
+            { q: "When did World War II end?", opts: ["1943", "1944", "1945", "1946"], correct: 2 },
+            { q: "Who was the first US President?", opts: ["Jefferson", "Washington", "Lincoln", "Adams"], correct: 1 },
+            { q: "When did humans first land on the Moon?", opts: ["1965", "1967", "1969", "1971"], correct: 2 },
+            { q: "Who painted the Mona Lisa?", opts: ["Picasso", "Van Gogh", "Da Vinci", "Michelangelo"], correct: 2 },
+            { q: "Which ancient wonder still stands?", opts: ["Colossus", "Pyramids of Giza", "Hanging Gardens", "Lighthouse"], correct: 1 },
+
+            // Maths
+            { q: "What is 12 × 8?", opts: ["84", "92", "96", "104"], correct: 2 },
+            { q: "What is 50% of 200?", opts: ["50", "75", "100", "125"], correct: 2 },
+            { q: "What is the square root of 64?", opts: ["6", "7", "8", "9"], correct: 2 },
+            { q: "What is 15 + 27?", opts: ["40", "41", "42", "43"], correct: 2 },
+            { q: "How many sides does a hexagon have?", opts: ["5", "6", "7", "8"], correct: 1 },
+            { q: "What is 9 × 7?", opts: ["54", "56", "63", "72"], correct: 2 }
+        ];
+
+        // Utility Functions
+        function weightedRandom(weights) {
+            const total = weights.reduce((a, b) => a + b, 0);
+            let random = Math.random() * total;
+            for (let i = 0; i < weights.length; i++) {
+                random -= weights[i];
+                if (random <= 0) return i;
+            }
+            return weights.length - 1;
+        }
+
+        function getComputerNumber(isBatting, availableNumbers) {
+            const strategy = isBatting
+                ? AI_STRATEGIES[gameState.difficulty].batsman
+                : AI_STRATEGIES[gameState.difficulty].bowler;
+
+            // If limited options, adjust distribution
+            if (availableNumbers.length === 2 && availableNumbers[0] === 0 && availableNumbers[1] === 1) {
+                return Math.random() < 0.5 ? 0 : 1;
+            }
+
+            const index = weightedRandom(strategy.dist);
+            return SCORING_OPTIONS[index];
+        }
+
+        function getRandomQuestion() {
+            return questions[Math.floor(Math.random() * questions.length)];
+        }
+
+        function computerAnswersCorrectly() {
+            return Math.random() < COMPUTER_CORRECT_RATE;
+        }
+
+        // UI Functions
+        function showScreen(screenId) {
+            ['difficultyScreen', 'questionScreen', 'deliveryScreen', 'resultScreen', 'summaryScreen']
+                .forEach(id => document.getElementById(id).classList.add('hidden'));
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function updateScoreboard() {
+            document.getElementById('playerScore').textContent = gameState.runs;
+            document.getElementById('playerWickets').textContent = `Wickets: ${gameState.wickets}`;
+
+            const overNum = Math.floor(gameState.ballCount / BALLS_PER_OVER);
+            const ballNum = gameState.ballCount % BALLS_PER_OVER;
+            document.getElementById('overDisplay').textContent = `${overNum}.${ballNum}`;
+        }
+
+        function updateOverTracker() {
+            const ballsDisplay = document.getElementById('ballsDisplay');
+            ballsDisplay.innerHTML = '';
+
+            for (let i = 0; i < BALLS_PER_OVER; i++) {
+                const ball = document.createElement('div');
+                ball.className = 'ball-indicator';
+
+                if (i < gameState.overBalls.length) {
+                    ball.className += gameState.overBalls[i] ? ' correct' : ' wrong';
+                    ball.textContent = gameState.overBalls[i] ? '✓' : '✗';
+                }
+
+                ballsDisplay.appendChild(ball);
+            }
+        }
+
+        function updateInningsInfo() {
+            const info = document.getElementById('inningsInfo');
+            const role = gameState.playerBatting ? 'Batting' : 'Bowling';
+            const opponentRole = gameState.playerBatting ? 'Bowling' : 'Batting';
+            const opponentName = gameState.playerBatting
+                ? AI_STRATEGIES[gameState.difficulty].bowler.name
+                : AI_STRATEGIES[gameState.difficulty].batsman.name;
+
+            info.textContent = `Innings ${gameState.currentInnings} - You are ${role} | ${opponentName} is ${opponentRole}`;
+        }
+
+        // UI Helper Functions
+        function updateOversDisplay() {
+            const overs = document.getElementById('oversSlider').value;
+            const plural = overs == 1 ? 'Over' : 'Overs';
+            document.getElementById('oversValue').textContent = `${overs} ${plural}`;
+        }
+
+        // Game Flow Functions
+        function selectDifficulty(difficulty) {
+            gameState.difficulty = difficulty;
+            gameState.overs = parseInt(document.getElementById('oversSlider').value);
+            gameState.totalBalls = gameState.overs * BALLS_PER_OVER;
+            gameState.phase = 'question';
+            document.getElementById('scoreboard').style.display = 'flex';
+            document.getElementById('overTracker').style.display = 'block';
+            document.getElementById('totalOvers').textContent = `of ${gameState.overs}.0`;
+            updateInningsInfo();
+            updateScoreboard();
+            updateOverTracker();
+            startQuestionPhase();
+        }
+
+        function startQuestionPhase() {
+            gameState.currentQuestion = getRandomQuestion();
+            gameState.playerAnswer = null;
+            gameState.computerAnswer = null;
+            gameState.availableNumbers = [...SCORING_OPTIONS]; // Reset to full options
+            gameState.isNoBall = false; // Reset no ball flag
+
+            document.getElementById('questionText').textContent = gameState.currentQuestion.q;
+
+            const optionsContainer = document.getElementById('questionOptions');
+            optionsContainer.innerHTML = '';
+
+            gameState.currentQuestion.opts.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.onclick = () => selectAnswer(index);
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById('submitAnswer').disabled = true;
+            showScreen('questionScreen');
+        }
+
+        function selectAnswer(index) {
+            gameState.playerAnswer = index;
+
+            // Update UI
+            document.querySelectorAll('.option-btn').forEach((btn, i) => {
+                btn.classList.toggle('selected', i === index);
+            });
+
+            document.getElementById('submitAnswer').disabled = false;
+        }
+
+        function submitAnswer() {
+            // Computer answers
+            const computerCorrect = computerAnswersCorrectly();
+            gameState.computerAnswer = computerCorrect
+                ? gameState.currentQuestion.correct
+                : (gameState.currentQuestion.correct + 1 + Math.floor(Math.random() * 3)) % 4;
+
+            const playerCorrect = gameState.playerAnswer === gameState.currentQuestion.correct;
+            const computerAnswerCorrect = gameState.computerAnswer === gameState.currentQuestion.correct;
+
+            // Track for over display
+            gameState.overBalls.push(playerCorrect);
+            updateOverTracker();
+
+            // Determine available numbers based on who answered correctly
+            const bowlerCorrect = gameState.playerBatting ? computerAnswerCorrect : playerCorrect;
+            const batsmanCorrect = gameState.playerBatting ? playerCorrect : computerAnswerCorrect;
+
+            gameState.isNoBall = !bowlerCorrect;
+
+            if (!batsmanCorrect && bowlerCorrect) {
+                // Batsman wrong, bowler right → limited to [0, 1]
+                gameState.availableNumbers = [0, 1];
+            } else {
+                // Normal play or no ball
+                gameState.availableNumbers = [...SCORING_OPTIONS];
+            }
+
+            // Wait a moment then go to delivery
+            setTimeout(() => {
+                startDeliveryPhase();
+            }, 1500);
+        }
+
+        function startDeliveryPhase() {
+            const role = gameState.playerBatting ? 'batting' : 'bowling';
+            let prompt = gameState.playerBatting ? 'Pick your number' : 'Pick your bowling number';
+
+            // Only reveal if the PLAYER (not computer) got question wrong
+            if (gameState.availableNumbers.length === 2 && gameState.playerBatting) {
+                prompt = 'You got the question wrong! Only [0, 1] available';
+            }
+
+            // Don't reveal no ball or computer's limited options - keep it blind!
+
+            document.getElementById('deliveryPrompt').textContent = prompt;
+
+            const numbersContainer = document.getElementById('numberOptions');
+            numbersContainer.innerHTML = '';
+
+            const numbersToShow = gameState.playerBatting
+                ? gameState.availableNumbers
+                : SCORING_OPTIONS;
+
+            numbersToShow.forEach(num => {
+                const btn = document.createElement('button');
+                btn.className = 'number-btn';
+                btn.textContent = num;
+                btn.onclick = () => selectNumber(num);
+                numbersContainer.appendChild(btn);
+            });
+
+            showScreen('deliveryScreen');
+        }
+
+        function selectNumber(num) {
+            gameState.playerNumber = num;
+
+            // Computer selects number
+            if (gameState.playerBatting) {
+                // Computer is bowling
+                gameState.computerNumber = getComputerNumber(false, SCORING_OPTIONS);
+            } else {
+                // Computer is batting - check if limited
+                const computerNumbers = gameState.availableNumbers.length === 2 ? [0, 1] : SCORING_OPTIONS;
+                gameState.computerNumber = getComputerNumber(true, computerNumbers);
+            }
+
+            // Process result
+            processDelivery();
+        }
+
+        function processDelivery() {
+            const numbersMatch = gameState.playerNumber === gameState.computerNumber;
+            let commentary = '';
+            let isWicket = false;
+
+            if (gameState.playerBatting) {
+                // Player is batting
+                if (numbersMatch && !gameState.isNoBall) {
+                    // OUT!
+                    isWicket = true;
+                    gameState.wickets++;
+                    gameState.runs = Math.max(0, gameState.runs - WICKET_PENALTY);
+                    commentary = `OUT! That's a wicket! -${WICKET_PENALTY} runs (minimum 0).`;
+                } else if (numbersMatch && gameState.isNoBall) {
+                    // Saved by no ball BUT scores 0 (edge case)
+                    commentary = `The numbers matched, but the no ball saves you! However, you score 0 runs.`;
+                } else {
+                    // Safe scoring
+                    gameState.runs += gameState.playerNumber;
+                    commentary = `Safe! You scored ${gameState.playerNumber} run(s).`;
+                }
+            } else {
+                // Player is bowling
+                if (numbersMatch && !gameState.isNoBall) {
+                    // Computer OUT!
+                    isWicket = true;
+                    gameState.wickets++;
+                    gameState.runs = Math.max(0, gameState.runs - WICKET_PENALTY);
+                    commentary = `Brilliant bowling! The computer is OUT! -${WICKET_PENALTY} runs.`;
+                } else if (numbersMatch && gameState.isNoBall) {
+                    // Saved by no ball BUT computer scores 0 (edge case)
+                    commentary = `Numbers matched but your no ball saves the computer! However, they score 0 runs.`;
+                } else {
+                    // Computer scores
+                    gameState.runs += gameState.computerNumber;
+                    commentary = `The computer scored ${gameState.computerNumber} run(s).`;
+                }
+            }
+
+            // Update ball count
+            gameState.ballCount++;
+            gameState.ballsInOver++;
+
+            // Check if over is complete
+            if (gameState.ballsInOver === BALLS_PER_OVER) {
+                gameState.ballsInOver = 0;
+                gameState.currentOver++;
+                gameState.overBalls = [];
+            }
+
+            updateScoreboard();
+            showResult(commentary, isWicket);
+        }
+
+        function showResult(commentary, isWicket) {
+            document.getElementById('playerChoice').textContent = gameState.playerNumber;
+            document.getElementById('computerChoice').textContent = gameState.computerNumber;
+
+            const commentaryDiv = document.getElementById('commentary');
+            commentaryDiv.className = isWicket ? 'commentary wicket-commentary' : 'commentary';
+
+            document.getElementById('commentaryTitle').textContent = isWicket ? 'WICKET!' : 'Result';
+            document.getElementById('commentaryText').textContent = commentary;
+
+            showScreen('resultScreen');
+        }
+
+        function nextBall() {
+            if (gameState.ballCount >= gameState.totalBalls) {
+                endInnings();
+            } else {
+                startQuestionPhase();
+            }
+        }
+
+        function endInnings() {
+            if (gameState.currentInnings === 1) {
+                // Save first innings
+                gameState.firstInningsScore = {
+                    runs: gameState.runs,
+                    wickets: gameState.wickets
+                };
+
+                // Start second innings
+                gameState.currentInnings = 2;
+                gameState.playerBatting = false;
+                gameState.ballCount = 0;
+                gameState.runs = 0;
+                gameState.wickets = 0;
+                gameState.currentOver = 0;
+                gameState.ballsInOver = 0;
+                gameState.overBalls = [];
+
+                updateInningsInfo();
+                updateScoreboard();
+                updateOverTracker();
+
+                alert(`First innings complete! You scored ${gameState.firstInningsScore.runs} runs.\n\nNow you're bowling!`);
+
+                startQuestionPhase();
+            } else {
+                // Save second innings
+                gameState.secondInningsScore = {
+                    runs: gameState.runs,
+                    wickets: gameState.wickets
+                };
+
+                showSummary();
+            }
+        }
+
+        function showSummary() {
+            const playerScore = gameState.firstInningsScore.runs;
+            const computerScore = gameState.secondInningsScore.runs;
+
+            document.getElementById('firstInningsScore').textContent = `${gameState.firstInningsScore.runs} runs`;
+            document.getElementById('firstInningsWickets').textContent = `${gameState.firstInningsScore.wickets} wickets`;
+
+            document.getElementById('secondInningsScore').textContent = `${gameState.secondInningsScore.runs} runs`;
+            document.getElementById('secondInningsWickets').textContent = `${gameState.secondInningsScore.wickets} wickets`;
+
+            let winnerMsg = '';
+            if (playerScore > computerScore) {
+                const margin = playerScore - computerScore;
+                winnerMsg = `🎉 You Win by ${margin} runs!`;
+            } else if (computerScore > playerScore) {
+                const margin = computerScore - playerScore;
+                winnerMsg = `💔 Computer Wins by ${margin} runs`;
+            } else {
+                winnerMsg = `🤝 It's a Tie!`;
+            }
+
+            const bowlerName = AI_STRATEGIES[gameState.difficulty].bowler.name;
+            const batsmanName = AI_STRATEGIES[gameState.difficulty].batsman.name;
+            winnerMsg += `<br><small>vs ${bowlerName} & ${batsmanName}</small>`;
+
+            document.getElementById('winnerMessage').innerHTML = winnerMsg;
+            document.getElementById('summaryTitle').textContent = 'Match Complete!';
+
+            showScreen('summaryScreen');
+        }
+
+        function restartGame() {
+            // Reset game state
+            gameState = {
+                difficulty: null,
+                overs: 3,
+                totalBalls: 18,
+                currentInnings: 1,
+                playerBatting: true,
+                ballCount: 0,
+                runs: 0,
+                wickets: 0,
+                currentOver: 0,
+                ballsInOver: 0,
+                overBalls: [],
+                firstInningsScore: { runs: 0, wickets: 0 },
+                secondInningsScore: { runs: 0, wickets: 0 },
+                phase: 'difficulty',
+                currentQuestion: null,
+                playerAnswer: null,
+                computerAnswer: null,
+                playerNumber: null,
+                computerNumber: null,
+                availableNumbers: [...SCORING_OPTIONS],
+                isNoBall: false
+            };
+
+            document.getElementById('scoreboard').style.display = 'none';
+            document.getElementById('overTracker').style.display = 'none';
+            document.getElementById('inningsInfo').textContent = 'Select Difficulty to Begin';
+            document.getElementById('oversSlider').value = 3;
+            updateOversDisplay();
+
+            showScreen('difficultyScreen');
+        }
+    </script>
+</body>
+</html>
