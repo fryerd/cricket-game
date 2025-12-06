@@ -704,15 +704,61 @@
 
         .warning-text {
             font-family: 'Fredoka', sans-serif;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             font-weight: 600;
-            color: var(--wicket-red);
+            color: white;
             text-align: center;
-            margin-top: 20px;
-            padding: 10px;
-            background: rgba(220, 53, 69, 0.1);
-            border: 2px solid var(--wicket-red);
-            grid-column: 1 / -1;
+            margin-bottom: 20px;
+            padding: 12px 15px;
+            background: var(--racing-orange);
+            border: 3px solid var(--crt-black);
+            box-shadow: 3px 3px 0 var(--warm-brown);
+        }
+
+        /* Answer Feedback Overlay */
+        .answer-feedback {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 600;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .answer-feedback.show {
+            opacity: 1;
+        }
+
+        .answer-feedback.correct {
+            background: rgba(0, 107, 63, 0.9);
+        }
+
+        .answer-feedback.wrong {
+            background: rgba(255, 107, 53, 0.9);
+        }
+
+        .feedback-content {
+            text-align: center;
+            color: white;
+        }
+
+        .feedback-icon {
+            font-size: 4rem;
+            margin-bottom: 10px;
+        }
+
+        .feedback-text {
+            font-family: 'Anton', sans-serif;
+            font-size: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
         }
 
         /* ========== RESULT SCREEN ========== */
@@ -1136,26 +1182,18 @@
             .title-main { font-size: 2rem; }
 
             .scorebug {
-                min-height: 100px;
+                min-height: auto;
                 flex-direction: column;
             }
 
             .scorebug-side {
-                flex-direction: row;
-                align-items: center;
-                justify-content: space-between;
-                width: 100%;
-                padding: 5px 10px;
-            }
-
-            .scorebug-side.left,
-            .scorebug-side.right {
-                align-items: center;
+                display: none; /* Hide ball history on mobile */
             }
 
             .scorebug-center {
-                padding: 8px 20px;
+                padding: 12px 20px;
                 min-width: auto;
+                width: 100%;
             }
 
             .scorebug-center::before,
@@ -1163,16 +1201,10 @@
                 display: none;
             }
 
-            .ball-dot {
-                width: 26px;
-                height: 26px;
-                font-size: 0.7rem;
-            }
-
             .main-score { font-size: 1.8rem; }
 
             .container {
-                padding-top: 160px;
+                padding-top: 100px;
             }
 
             .number-btn {
@@ -1195,6 +1227,14 @@
                 width: 50px;
                 height: 50px;
             }
+
+            .feedback-text {
+                font-size: 1.5rem;
+            }
+
+            .feedback-icon {
+                font-size: 3rem;
+            }
         }
     </style>
 </head>
@@ -1203,6 +1243,14 @@
     <div class="speed-lines"></div>
     <div class="corner-deco top-left"></div>
     <div class="corner-deco top-right"></div>
+
+    <!-- Answer Feedback Overlay -->
+    <div class="answer-feedback" id="answerFeedback">
+        <div class="feedback-content">
+            <div class="feedback-icon" id="feedbackIcon"></div>
+            <div class="feedback-text" id="feedbackText"></div>
+        </div>
+    </div>
 
     <!-- Cricket Pitch Background -->
     <div class="cricket-pitch-bg">
@@ -1298,6 +1346,7 @@
                 </div>
                 <div style="padding-top: 20px;">
                     <div class="delivery-prompt" id="deliveryPrompt">How many runs do you want to score?</div>
+                    <div class="warning-text hidden" id="defenseWarning">Question incorrect - you can only defend!</div>
                     <div class="number-grid" id="numberOptions"></div>
                 </div>
             </div>
@@ -1356,9 +1405,7 @@
     </div>
 
     <div class="sponsor-bar">
-        <span class="sponsor-text">World Cup 1992</span>
-        <span class="sponsor-text">•</span>
-        <span class="sponsor-text">Cricket Quiz</span>
+        <span class="sponsor-text">1992 Quiz Cricket</span>
     </div>
 
     <script>
@@ -1397,7 +1444,7 @@
             wickets: 0,
             currentOver: 0,
             ballsInOver: 0,
-            // Ball history: {questionCorrect: bool, numberChosen: number, wicket: bool}
+            // Ball history: {playerCorrect: bool, computerCorrect: bool, numberChosen: number, wicket: bool}
             ballHistory: [],
             firstInningsScore: { runs: 0, wickets: 0 },
             secondInningsScore: { runs: 0, wickets: 0 },
@@ -1550,14 +1597,19 @@
                 if (ballIdx < gameState.ballHistory.length) {
                     const ball = gameState.ballHistory[ballIdx];
 
-                    // Color based on question correctness
-                    if (ball.questionCorrect) {
-                        batsmanDot.classList.add('correct');
-                        bowlerDot.classList.add('correct');
-                    } else {
-                        batsmanDot.classList.add('wrong');
-                        bowlerDot.classList.add('wrong');
-                    }
+                    // Batsman side shows batsman's correctness
+                    // Bowler side shows bowler's correctness
+                    // When player is batting: batsman=player, bowler=computer
+                    // When player is bowling: batsman=computer, bowler=player
+                    const batsmanCorrect = gameState.playerBatting
+                        ? ball.playerCorrect
+                        : ball.computerCorrect;
+                    const bowlerCorrect = gameState.playerBatting
+                        ? ball.computerCorrect
+                        : ball.playerCorrect;
+
+                    batsmanDot.classList.add(batsmanCorrect ? 'correct' : 'wrong');
+                    bowlerDot.classList.add(bowlerCorrect ? 'correct' : 'wrong');
 
                     // Content: W for wicket, number otherwise
                     const content = ball.wicket ? 'W' : ball.numberChosen;
@@ -1628,24 +1680,37 @@
 
         function selectAnswer(index) {
             if (gameState.isProcessing) return;
+            gameState.isProcessing = true;
 
             gameState.playerAnswer = index;
 
             document.querySelectorAll('.option-btn').forEach((btn, i) => {
                 btn.classList.toggle('selected', i === index);
-                btn.disabled = true; // Disable all buttons after selection
+                btn.disabled = true;
             });
 
-            // Auto-submit after brief visual feedback
+            // Check if answer is correct
+            const isCorrect = index === gameState.currentQuestion.correct;
+
+            // Show feedback overlay
+            const feedback = document.getElementById('answerFeedback');
+            const feedbackIcon = document.getElementById('feedbackIcon');
+            const feedbackText = document.getElementById('feedbackText');
+
+            feedback.classList.remove('correct', 'wrong');
+            feedback.classList.add(isCorrect ? 'correct' : 'wrong');
+            feedbackIcon.textContent = isCorrect ? '✓' : '✗';
+            feedbackText.textContent = isCorrect ? 'Correct!' : 'Wrong!';
+            feedback.classList.add('show');
+
+            // Transition to delivery phase after feedback
             setTimeout(() => {
+                feedback.classList.remove('show');
                 submitAnswer();
-            }, 400);
+            }, 800);
         }
 
         function submitAnswer() {
-            if (gameState.isProcessing) return;
-            gameState.isProcessing = true;
-
             const computerCorrect = computerAnswersCorrectly();
             gameState.computerAnswer = computerCorrect
                 ? gameState.currentQuestion.correct
@@ -1692,6 +1757,14 @@
 
             const isLimited = playerAvailableNumbers.length === 2;
 
+            // Show/hide warning above the grid
+            const warningEl = document.getElementById('defenseWarning');
+            if (isLimited && gameState.playerBatting) {
+                warningEl.classList.remove('hidden');
+            } else {
+                warningEl.classList.add('hidden');
+            }
+
             DISPLAY_ORDER.forEach(num => {
                 const btn = document.createElement('button');
                 btn.className = 'number-btn';
@@ -1707,13 +1780,6 @@
 
                 numbersContainer.appendChild(btn);
             });
-
-            if (isLimited && gameState.playerBatting) {
-                const warning = document.createElement('div');
-                warning.className = 'warning-text';
-                warning.textContent = 'Question incorrect - you can only defend!';
-                numbersContainer.appendChild(warning);
-            }
 
             showScreen('deliveryScreen');
         }
@@ -1782,9 +1848,10 @@
                 }
             }
 
-            // Record ball in history with question correctness and number chosen
+            // Record ball in history with both player and computer correctness
             gameState.ballHistory.push({
-                questionCorrect: gameState.lastPlayerCorrect,
+                playerCorrect: gameState.lastPlayerCorrect,
+                computerCorrect: gameState.lastComputerCorrect,
                 numberChosen: playerNumberChosen,
                 wicket: isWicket
             });
