@@ -297,11 +297,32 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s;
+            position: relative;
         }
 
         .number-btn:hover {
             background: #1e4620;
             transform: scale(1.05);
+        }
+
+        .number-btn:disabled {
+            background: #ccc;
+            color: #888;
+            cursor: not-allowed;
+            border: 2px dashed #999;
+        }
+
+        .number-btn:disabled:hover {
+            transform: none;
+            background: #ccc;
+        }
+
+        .warning-text {
+            font-size: 0.9rem;
+            color: #c0392b;
+            margin-top: 15px;
+            font-weight: bold;
+            text-align: center;
         }
 
         /* Result Phase */
@@ -443,7 +464,7 @@
 
         <div class="scoreboard" id="scoreboard" style="display: none;">
             <div class="score-box">
-                <h3>YOUR SCORE</h3>
+                <h3 id="battingLabel">BATTING</h3>
                 <div class="score" id="playerScore">0</div>
                 <div class="detail" id="playerWickets">Wickets: 0</div>
             </div>
@@ -453,9 +474,9 @@
                 <div class="detail" id="totalOvers">of 3.0</div>
             </div>
             <div class="score-box">
-                <h3>COMPUTER</h3>
-                <div class="score" id="computerScore">0</div>
-                <div class="detail" id="computerWickets">Wickets: 0</div>
+                <h3 id="targetLabel">TARGET</h3>
+                <div class="score" id="computerScore">-</div>
+                <div class="detail" id="computerWickets"></div>
             </div>
         </div>
 
@@ -587,7 +608,9 @@
             playerNumber: null,
             computerNumber: null,
             availableNumbers: [...SCORING_OPTIONS],
-            isNoBall: false
+            isNoBall: false,
+            usedQuestions: [], // Track used questions to avoid repeats
+            isProcessing: false // Prevent double-clicks
         };
 
         // Question Pool
@@ -665,7 +688,26 @@
         }
 
         function getRandomQuestion() {
-            return questions[Math.floor(Math.random() * questions.length)];
+            // Get available questions (not yet used)
+            const availableIndices = [];
+            for (let i = 0; i < questions.length; i++) {
+                if (!gameState.usedQuestions.includes(i)) {
+                    availableIndices.push(i);
+                }
+            }
+
+            // If all questions used, reset the pool
+            if (availableIndices.length === 0) {
+                gameState.usedQuestions = [];
+                for (let i = 0; i < questions.length; i++) {
+                    availableIndices.push(i);
+                }
+            }
+
+            // Pick random from available
+            const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+            gameState.usedQuestions.push(randomIndex);
+            return questions[randomIndex];
         }
 
         function computerAnswersCorrectly() {
@@ -686,6 +728,19 @@
             const overNum = Math.floor(gameState.ballCount / BALLS_PER_OVER);
             const ballNum = gameState.ballCount % BALLS_PER_OVER;
             document.getElementById('overDisplay').textContent = `${overNum}.${ballNum}`;
+
+            // Update labels based on innings
+            if (gameState.currentInnings === 1) {
+                document.getElementById('battingLabel').textContent = 'YOU BATTING';
+                document.getElementById('targetLabel').textContent = 'TARGET';
+                document.getElementById('computerScore').textContent = '-';
+                document.getElementById('computerWickets').textContent = '';
+            } else {
+                document.getElementById('battingLabel').textContent = 'COMPUTER BATTING';
+                document.getElementById('targetLabel').textContent = 'YOUR TARGET';
+                document.getElementById('computerScore').textContent = gameState.firstInningsScore.runs + 1;
+                document.getElementById('computerWickets').textContent = `You scored: ${gameState.firstInningsScore.runs}`;
+            }
         }
 
         function updateOverTracker() {
@@ -744,6 +799,7 @@
             gameState.computerAnswer = null;
             gameState.availableNumbers = [...SCORING_OPTIONS]; // Reset to full options
             gameState.isNoBall = false; // Reset no ball flag
+            gameState.isProcessing = false; // Allow interactions
 
             document.getElementById('questionText').textContent = gameState.currentQuestion.q;
 
@@ -774,6 +830,11 @@
         }
 
         function submitAnswer() {
+            // Prevent double-clicks
+            if (gameState.isProcessing) return;
+            gameState.isProcessing = true;
+            document.getElementById('submitAnswer').disabled = true;
+
             // Computer answers
             const computerCorrect = computerAnswersCorrectly();
             gameState.computerAnswer = computerCorrect
@@ -808,37 +869,59 @@
         }
 
         function startDeliveryPhase() {
+            gameState.isProcessing = false; // Allow interactions
+
             const role = gameState.playerBatting ? 'batting' : 'bowling';
             let prompt = gameState.playerBatting ? 'Pick your number' : 'Pick your bowling number';
-
-            // Only reveal if the PLAYER (not computer) got question wrong
-            if (gameState.availableNumbers.length === 2 && gameState.playerBatting) {
-                prompt = 'You got the question wrong! Only [0, 1] available';
-            }
-
-            // Don't reveal no ball or computer's limited options - keep it blind!
 
             document.getElementById('deliveryPrompt').textContent = prompt;
 
             const numbersContainer = document.getElementById('numberOptions');
             numbersContainer.innerHTML = '';
 
-            const numbersToShow = gameState.playerBatting
+            // Always show ALL number options, but disable unavailable ones
+            const playerAvailableNumbers = gameState.playerBatting
                 ? gameState.availableNumbers
                 : SCORING_OPTIONS;
 
-            numbersToShow.forEach(num => {
+            const isLimited = playerAvailableNumbers.length === 2;
+
+            SCORING_OPTIONS.forEach(num => {
                 const btn = document.createElement('button');
                 btn.className = 'number-btn';
                 btn.textContent = num;
-                btn.onclick = () => selectNumber(num);
+
+                const isAvailable = playerAvailableNumbers.includes(num);
+
+                if (isAvailable) {
+                    btn.onclick = () => selectNumber(num);
+                } else {
+                    btn.disabled = true;
+                    btn.title = 'Question incorrect - you got to defend!';
+                }
+
                 numbersContainer.appendChild(btn);
             });
+
+            // Add warning text if player is limited
+            if (isLimited && gameState.playerBatting) {
+                const warning = document.createElement('div');
+                warning.className = 'warning-text';
+                warning.textContent = '⚠️ Question incorrect - you got to defend!';
+                numbersContainer.appendChild(warning);
+            }
 
             showScreen('deliveryScreen');
         }
 
         function selectNumber(num) {
+            // Prevent double-clicks
+            if (gameState.isProcessing) return;
+            gameState.isProcessing = true;
+
+            // Disable all number buttons immediately
+            document.querySelectorAll('.number-btn').forEach(btn => btn.disabled = true);
+
             gameState.playerNumber = num;
 
             // Computer selects number
@@ -1020,7 +1103,9 @@
                 playerNumber: null,
                 computerNumber: null,
                 availableNumbers: [...SCORING_OPTIONS],
-                isNoBall: false
+                isNoBall: false,
+                usedQuestions: [],
+                isProcessing: false
             };
 
             document.getElementById('scoreboard').style.display = 'none';
