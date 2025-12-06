@@ -622,6 +622,19 @@
             color: white;
         }
 
+        .option-btn.correct-answer {
+            background: var(--pakistan-green);
+            color: white;
+            border-color: #1e7e34;
+            transform: scale(1.02);
+        }
+
+        .option-btn.wrong-answer {
+            background: var(--racing-orange);
+            color: white;
+            border-color: #cc5529;
+        }
+
         .submit-btn {
             font-family: 'Anton', sans-serif;
             font-size: 1.3rem;
@@ -702,63 +715,25 @@
             transform: none;
         }
 
-        .warning-text {
+        /* Delivery Status Box */
+        .delivery-status {
             font-family: 'Fredoka', sans-serif;
-            font-size: 0.95rem;
+            font-size: 1.1rem;
             font-weight: 600;
             color: white;
             text-align: center;
-            margin-bottom: 20px;
-            padding: 12px 15px;
+            margin-bottom: 25px;
+            padding: 15px 20px;
+            border: 4px solid var(--crt-black);
+            box-shadow: 4px 4px 0 var(--warm-brown);
+        }
+
+        .delivery-status.incorrect {
             background: var(--racing-orange);
-            border: 3px solid var(--crt-black);
-            box-shadow: 3px 3px 0 var(--warm-brown);
         }
 
-        /* Answer Feedback Overlay */
-        .answer-feedback {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 600;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease;
-        }
-
-        .answer-feedback.show {
-            opacity: 1;
-        }
-
-        .answer-feedback.correct {
-            background: rgba(0, 107, 63, 0.9);
-        }
-
-        .answer-feedback.wrong {
-            background: rgba(255, 107, 53, 0.9);
-        }
-
-        .feedback-content {
-            text-align: center;
-            color: white;
-        }
-
-        .feedback-icon {
-            font-size: 4rem;
-            margin-bottom: 10px;
-        }
-
-        .feedback-text {
-            font-family: 'Anton', sans-serif;
-            font-size: 2rem;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+        .delivery-status.correct {
+            background: var(--pakistan-green);
         }
 
         /* ========== RESULT SCREEN ========== */
@@ -1227,14 +1202,6 @@
                 width: 50px;
                 height: 50px;
             }
-
-            .feedback-text {
-                font-size: 1.5rem;
-            }
-
-            .feedback-icon {
-                font-size: 3rem;
-            }
         }
     </style>
 </head>
@@ -1243,14 +1210,6 @@
     <div class="speed-lines"></div>
     <div class="corner-deco top-left"></div>
     <div class="corner-deco top-right"></div>
-
-    <!-- Answer Feedback Overlay -->
-    <div class="answer-feedback" id="answerFeedback">
-        <div class="feedback-content">
-            <div class="feedback-icon" id="feedbackIcon"></div>
-            <div class="feedback-text" id="feedbackText"></div>
-        </div>
-    </div>
 
     <!-- Cricket Pitch Background -->
     <div class="cricket-pitch-bg">
@@ -1345,8 +1304,7 @@
                     <div class="progress-segment active"></div>
                 </div>
                 <div style="padding-top: 20px;">
-                    <div class="delivery-prompt" id="deliveryPrompt">How many runs do you want to score?</div>
-                    <div class="warning-text hidden" id="defenseWarning">Question incorrect - you can only defend!</div>
+                    <div class="delivery-status" id="deliveryStatus"></div>
                     <div class="number-grid" id="numberOptions"></div>
                 </div>
             </div>
@@ -1684,30 +1642,21 @@
 
             gameState.playerAnswer = index;
 
-            document.querySelectorAll('.option-btn').forEach((btn, i) => {
-                btn.classList.toggle('selected', i === index);
-                btn.disabled = true;
-            });
-
             // Check if answer is correct
             const isCorrect = index === gameState.currentQuestion.correct;
 
-            // Show feedback overlay
-            const feedback = document.getElementById('answerFeedback');
-            const feedbackIcon = document.getElementById('feedbackIcon');
-            const feedbackText = document.getElementById('feedbackText');
-
-            feedback.classList.remove('correct', 'wrong');
-            feedback.classList.add(isCorrect ? 'correct' : 'wrong');
-            feedbackIcon.textContent = isCorrect ? '✓' : '✗';
-            feedbackText.textContent = isCorrect ? 'Correct!' : 'Wrong!';
-            feedback.classList.add('show');
+            // Highlight the selected option with correct/wrong color
+            document.querySelectorAll('.option-btn').forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === index) {
+                    btn.classList.add(isCorrect ? 'correct-answer' : 'wrong-answer');
+                }
+            });
 
             // Transition to delivery phase after feedback
             setTimeout(() => {
-                feedback.classList.remove('show');
                 submitAnswer();
-            }, 800);
+            }, 600);
         }
 
         function submitAnswer() {
@@ -1728,7 +1677,8 @@
 
             gameState.isNoBall = !bowlerCorrect;
 
-            if (!batsmanCorrect && bowlerCorrect) {
+            // Batsman limited to 0,1 if they got the question wrong (regardless of bowler)
+            if (!batsmanCorrect) {
                 gameState.availableNumbers = [0, 1];
             } else {
                 gameState.availableNumbers = [...SCORING_OPTIONS];
@@ -1736,17 +1686,29 @@
 
             setTimeout(() => {
                 startDeliveryPhase();
-            }, 800);
+            }, 600);
         }
+
+        // Status messages for delivery phase
+        const CORRECT_MESSAGES = [
+            "Question correct! Play your shots!",
+            "Well answered! Time to score!",
+            "Correct! Pick your runs!",
+            "Right answer! Go big or go home!",
+            "Nailed it! Take your pick!"
+        ];
+
+        const INCORRECT_MESSAGES = [
+            "Question incorrect. Defend for your life!",
+            "Wrong answer! Time to survive!",
+            "Incorrect! Play it safe!",
+            "Missed it! Defend or perish!",
+            "Wrong! Block it out!"
+        ];
 
         function startDeliveryPhase() {
             gameState.isProcessing = false;
             gameState.phase = 'delivery';
-
-            const prompt = gameState.playerBatting
-                ? 'How many runs do you want to score?'
-                : 'Pick your bowling number';
-            document.getElementById('deliveryPrompt').textContent = prompt;
 
             const numbersContainer = document.getElementById('numberOptions');
             numbersContainer.innerHTML = '';
@@ -1757,12 +1719,25 @@
 
             const isLimited = playerAvailableNumbers.length === 2;
 
-            // Show/hide warning above the grid
-            const warningEl = document.getElementById('defenseWarning');
-            if (isLimited && gameState.playerBatting) {
-                warningEl.classList.remove('hidden');
+            // Show status message
+            const statusEl = document.getElementById('deliveryStatus');
+            if (gameState.playerBatting) {
+                if (isLimited) {
+                    statusEl.className = 'delivery-status incorrect';
+                    statusEl.textContent = INCORRECT_MESSAGES[Math.floor(Math.random() * INCORRECT_MESSAGES.length)];
+                } else {
+                    statusEl.className = 'delivery-status correct';
+                    statusEl.textContent = CORRECT_MESSAGES[Math.floor(Math.random() * CORRECT_MESSAGES.length)];
+                }
             } else {
-                warningEl.classList.add('hidden');
+                // When bowling, show based on player's question result
+                if (gameState.lastPlayerCorrect) {
+                    statusEl.className = 'delivery-status correct';
+                    statusEl.textContent = "Question correct! Pick your bowling number!";
+                } else {
+                    statusEl.className = 'delivery-status incorrect';
+                    statusEl.textContent = "Question incorrect. It's a No Ball!";
+                }
             }
 
             DISPLAY_ORDER.forEach(num => {
@@ -1819,7 +1794,7 @@
                     gameState.runs = Math.max(0, gameState.runs - WICKET_PENALTY);
                     commentary = `OUT! Bowled! -${WICKET_PENALTY} runs penalty.`;
                 } else if (numbersMatch && gameState.isNoBall) {
-                    commentary = `No ball saves you! But you score 0 runs.`;
+                    commentary = `WICKET!! ...Oh wait, NO BALL! You survive! 0 runs.`;
                 } else {
                     runsScored = gameState.playerNumber;
                     gameState.runs += runsScored;
@@ -1839,7 +1814,7 @@
                     gameState.runs = Math.max(0, gameState.runs - WICKET_PENALTY);
                     commentary = `WICKET! Great bowling! -${WICKET_PENALTY} runs.`;
                 } else if (numbersMatch && gameState.isNoBall) {
-                    commentary = `No ball! Computer survives but scores 0.`;
+                    commentary = `GOT HIM!! ...No wait, NO BALL! Batsman survives! 0 runs.`;
                 } else {
                     runsScored = gameState.computerNumber;
                     gameState.runs += runsScored;
