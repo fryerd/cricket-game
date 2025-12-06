@@ -726,6 +726,7 @@
             padding: 15px 20px;
             border: 4px solid var(--crt-black);
             box-shadow: 4px 4px 0 var(--warm-brown);
+            position: relative;
         }
 
         .delivery-status.incorrect {
@@ -734,6 +735,90 @@
 
         .delivery-status.correct {
             background: var(--pakistan-green);
+        }
+
+        /* Info icon for no-ball explainer */
+        .info-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            font-size: 0.8rem;
+            line-height: 20px;
+            margin-left: 8px;
+            cursor: pointer;
+            vertical-align: middle;
+        }
+
+        .info-icon:hover {
+            background: rgba(255,255,255,0.5);
+        }
+
+        /* Explainer Modal */
+        .explainer-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 700;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .explainer-modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .explainer-content {
+            background: linear-gradient(180deg, #2a2a2a, #1a1a1a);
+            border: 4px solid var(--bh-gold);
+            padding: 25px 30px;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 6px 6px 0 var(--warm-brown);
+        }
+
+        .explainer-title {
+            font-family: 'Anton', sans-serif;
+            font-size: 1.4rem;
+            color: var(--racing-orange);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        .explainer-text {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1rem;
+            color: var(--cream);
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .explainer-close {
+            font-family: 'Anton', sans-serif;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 10px 30px;
+            background: var(--bh-gold);
+            color: var(--crt-black);
+            border: 3px solid var(--crt-black);
+            cursor: pointer;
+            box-shadow: 3px 3px 0 var(--warm-brown);
+        }
+
+        .explainer-close:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0 var(--warm-brown);
         }
 
         /* ========== RESULT SCREEN ========== */
@@ -1405,6 +1490,19 @@
     <div class="corner-deco top-left"></div>
     <div class="corner-deco top-right"></div>
 
+    <!-- No-Ball Explainer Modal -->
+    <div class="explainer-modal" id="explainerModal" onclick="closeExplainer(event)">
+        <div class="explainer-content" onclick="event.stopPropagation()">
+            <div class="explainer-title">No Ball!</div>
+            <div class="explainer-text">
+                You got the question wrong, so it's a free hit for the batsman. No chance of getting a wicket this ball!
+                <br><br>
+                But if you pick the same number as the batsman, they won't score any runs.
+            </div>
+            <button class="explainer-close" onclick="closeExplainer()">Got it</button>
+        </div>
+    </div>
+
     <!-- Cricket Pitch Background -->
     <div class="cricket-pitch-bg">
         <div class="pitch-sky">
@@ -1754,13 +1852,19 @@
             // Balls played
             document.getElementById('scoreBalls').textContent = `(${gameState.ballCount} balls)`;
 
-            // Wickets
-            document.getElementById('wicketsDisplay').textContent = `Wickets: ${gameState.wickets}`;
-
-            // Overs
-            const overNum = Math.floor(gameState.ballCount / BALLS_PER_OVER);
-            const ballNum = gameState.ballCount % BALLS_PER_OVER;
-            document.getElementById('oversDisplay').textContent = `Overs: ${overNum}.${ballNum}`;
+            if (gameState.currentInnings === 2) {
+                // Second innings (bowling): show target and balls remaining
+                const target = gameState.firstInningsScore.runs + 1;
+                const ballsRemaining = gameState.totalBalls - gameState.ballCount;
+                document.getElementById('wicketsDisplay').textContent = `Target: ${target}`;
+                document.getElementById('oversDisplay').textContent = `Balls left: ${ballsRemaining}`;
+            } else {
+                // First innings (batting): show wickets and overs
+                document.getElementById('wicketsDisplay').textContent = `Wickets: ${gameState.wickets}`;
+                const overNum = Math.floor(gameState.ballCount / BALLS_PER_OVER);
+                const ballNum = gameState.ballCount % BALLS_PER_OVER;
+                document.getElementById('oversDisplay').textContent = `Overs: ${overNum}.${ballNum}`;
+            }
 
             updateBallHistory();
         }
@@ -1964,10 +2068,10 @@
                 // When bowling, show based on player's question result
                 if (gameState.lastPlayerCorrect) {
                     statusEl.className = 'delivery-status correct';
-                    statusEl.textContent = "Question correct! Pick your bowling number!";
+                    statusEl.textContent = "What do you think the batsman will play?";
                 } else {
                     statusEl.className = 'delivery-status incorrect';
-                    statusEl.textContent = "Question incorrect. It's a No Ball!";
+                    statusEl.innerHTML = `No Ball! <span class="info-icon" onclick="showExplainer(event)">?</span>`;
                 }
             }
 
@@ -2604,6 +2708,17 @@
             updateOversDisplay();
 
             showScreen('difficultyScreen');
+        }
+
+        // Explainer modal functions
+        function showExplainer(event) {
+            event.stopPropagation();
+            document.getElementById('explainerModal').classList.add('show');
+        }
+
+        function closeExplainer(event) {
+            if (event && event.target !== document.getElementById('explainerModal')) return;
+            document.getElementById('explainerModal').classList.remove('show');
         }
     </script>
 </body>
