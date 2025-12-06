@@ -1148,6 +1148,200 @@
             display: none;
         }
 
+        /* ========== WORM CHART / INNINGS BREAK ========== */
+        .worm-chart-panel {
+            background: linear-gradient(180deg, #2a2a2a, #1a1a1a);
+            border: 5px solid var(--crt-black);
+            box-shadow: 6px 6px 0 var(--warm-brown);
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .worm-header {
+            background: linear-gradient(180deg, #3a3a3a, #2a2a2a);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 4px solid var(--crt-black);
+            position: relative;
+        }
+
+        .worm-header::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 20px;
+            background: linear-gradient(180deg, #2a2a2a, #1a1a1a);
+            clip-path: polygon(10% 0, 90% 0, 100% 100%, 0 100%);
+            border-bottom: 4px solid var(--crt-black);
+        }
+
+        .worm-title {
+            font-family: 'Anton', sans-serif;
+            font-size: 1.4rem;
+            color: var(--cream);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+
+        .worm-team-badge {
+            width: 40px;
+            height: 30px;
+            background: var(--pakistan-green);
+            border: 2px solid var(--crt-black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Anton', sans-serif;
+            font-size: 0.7rem;
+            color: white;
+        }
+
+        .worm-team-badge.batting {
+            background: var(--electric-teal);
+        }
+
+        .worm-team-badge.bowling {
+            background: var(--racing-orange);
+        }
+
+        .worm-chart-container {
+            padding: 20px;
+            position: relative;
+        }
+
+        .worm-canvas-wrapper {
+            background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
+            border: 3px solid #333;
+            padding: 15px;
+            position: relative;
+        }
+
+        #wormCanvas {
+            display: block;
+            width: 100%;
+            height: 250px;
+        }
+
+        .worm-legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.innings1 {
+            background: var(--electric-teal);
+        }
+
+        .legend-dot.innings2 {
+            background: var(--racing-orange);
+        }
+
+        .legend-dot.wicket {
+            background: var(--wicket-red);
+            border: 2px solid #a02020;
+        }
+
+        .legend-dot.six {
+            background: var(--success-green);
+            border: 2px solid #1e7e34;
+        }
+
+        .legend-line {
+            width: 20px;
+            height: 3px;
+        }
+
+        .legend-line.innings1 {
+            background: var(--electric-teal);
+        }
+
+        .legend-line.innings2 {
+            background: var(--racing-orange);
+        }
+
+        .worm-summary {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid #333;
+        }
+
+        .worm-innings-score {
+            text-align: center;
+        }
+
+        .worm-innings-label {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 0.8rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .worm-innings-runs {
+            font-family: 'Anton', sans-serif;
+            font-size: 1.8rem;
+            color: var(--bh-gold);
+            text-shadow: 2px 2px 0 var(--warm-brown);
+        }
+
+        .worm-innings-runs.batting {
+            color: var(--electric-teal);
+        }
+
+        .worm-innings-runs.bowling {
+            color: var(--racing-orange);
+        }
+
+        .continue-btn {
+            font-family: 'Anton', sans-serif;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 15px 40px;
+            background: linear-gradient(180deg, var(--bh-gold), #c9a030);
+            color: var(--crt-black);
+            border: 4px solid var(--crt-black);
+            cursor: pointer;
+            box-shadow: 4px 4px 0 var(--warm-brown);
+            transition: all 0.1s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .continue-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 var(--warm-brown);
+        }
+
         .hidden {
             display: none !important;
         }
@@ -1339,6 +1533,41 @@
                 </div>
             </div>
 
+            <!-- Innings Break / Worm Chart Screen -->
+            <div class="worm-chart-panel hidden" id="inningsBreakScreen">
+                <div class="worm-header">
+                    <div class="worm-team-badge batting" id="wormBatBadge">YOU</div>
+                    <div class="worm-title" id="wormTitle">Innings</div>
+                    <div class="worm-team-badge bowling" id="wormBowlBadge">CPU</div>
+                </div>
+                <div class="worm-chart-container">
+                    <div class="worm-canvas-wrapper">
+                        <canvas id="wormCanvas"></canvas>
+                    </div>
+                    <div class="worm-legend" id="wormLegend">
+                        <div class="legend-item">
+                            <div class="legend-line innings1"></div>
+                            <span>1st Innings</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot six"></div>
+                            <span>Six</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot wicket"></div>
+                            <span>Wicket</span>
+                        </div>
+                    </div>
+                    <div class="worm-summary" id="wormSummary">
+                        <div class="worm-innings-score">
+                            <div class="worm-innings-label">Your Score</div>
+                            <div class="worm-innings-runs batting" id="wormScore1">0</div>
+                        </div>
+                    </div>
+                    <button class="continue-btn" id="continueBtn" onclick="continueFromInningsBreak()">Continue</button>
+                </div>
+            </div>
+
             <!-- Summary Screen -->
             <div class="game-panel welcome hidden" id="summaryScreen">
                 <div class="summary-title">Match Complete!</div>
@@ -1404,6 +1633,8 @@
             ballsInOver: 0,
             // Ball history: {playerCorrect: bool, computerCorrect: bool, numberChosen: number, wicket: bool}
             ballHistory: [],
+            // Worm data: array of {ball: number, runs: number, wicket: bool, six: bool} for each innings
+            wormData: { innings1: [], innings2: [] },
             firstInningsScore: { runs: 0, wickets: 0 },
             secondInningsScore: { runs: 0, wickets: 0 },
             phase: 'difficulty',
@@ -1511,7 +1742,7 @@
 
         // UI Functions
         function showScreen(screenId) {
-            ['difficultyScreen', 'questionScreen', 'deliveryScreen', 'resultScreen', 'summaryScreen']
+            ['difficultyScreen', 'questionScreen', 'deliveryScreen', 'resultScreen', 'inningsBreakScreen', 'summaryScreen']
                 .forEach(id => document.getElementById(id).classList.add('hidden'));
             document.getElementById(screenId).classList.remove('hidden');
         }
@@ -1831,6 +2062,17 @@
                 wicket: isWicket
             });
 
+            // Track worm data for the chart
+            const isSix = (gameState.playerBatting && runsScored === 6) ||
+                          (!gameState.playerBatting && runsScored === 6);
+            const wormKey = gameState.currentInnings === 1 ? 'innings1' : 'innings2';
+            gameState.wormData[wormKey].push({
+                ball: gameState.ballCount + 1,
+                runs: gameState.runs,
+                wicket: isWicket,
+                six: isSix
+            });
+
             gameState.ballCount++;
             gameState.ballsInOver++;
 
@@ -2029,6 +2271,108 @@
                     wickets: gameState.wickets
                 };
 
+                // Show innings break with worm chart
+                showInningsBreak(false);
+            } else {
+                gameState.secondInningsScore = {
+                    runs: gameState.runs,
+                    wickets: gameState.wickets
+                };
+
+                // Show final worm chart before summary
+                showInningsBreak(true);
+            }
+        }
+
+        function showInningsBreak(isMatchComplete) {
+            gameState.phase = 'inningsBreak';
+
+            // Update title
+            const title = document.getElementById('wormTitle');
+            title.textContent = isMatchComplete ? 'Match Summary' : '1st Innings';
+
+            // Update badges
+            document.getElementById('wormBatBadge').textContent = 'YOU';
+            document.getElementById('wormBowlBadge').textContent = 'CPU';
+
+            // Update legend for match complete (show both innings)
+            const legend = document.getElementById('wormLegend');
+            if (isMatchComplete) {
+                legend.innerHTML = `
+                    <div class="legend-item">
+                        <div class="legend-line innings1"></div>
+                        <span>Your Innings</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-line innings2"></div>
+                        <span>CPU Innings</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot six"></div>
+                        <span>Six</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot wicket"></div>
+                        <span>Wicket</span>
+                    </div>
+                `;
+            } else {
+                legend.innerHTML = `
+                    <div class="legend-item">
+                        <div class="legend-line innings1"></div>
+                        <span>Your Innings</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot six"></div>
+                        <span>Six</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot wicket"></div>
+                        <span>Wicket</span>
+                    </div>
+                `;
+            }
+
+            // Update summary section
+            const summary = document.getElementById('wormSummary');
+            if (isMatchComplete) {
+                summary.innerHTML = `
+                    <div class="worm-innings-score">
+                        <div class="worm-innings-label">Your Score</div>
+                        <div class="worm-innings-runs batting">${gameState.firstInningsScore.runs}</div>
+                    </div>
+                    <div class="worm-innings-score">
+                        <div class="worm-innings-label">CPU Score</div>
+                        <div class="worm-innings-runs bowling">${gameState.secondInningsScore.runs}</div>
+                    </div>
+                `;
+            } else {
+                summary.innerHTML = `
+                    <div class="worm-innings-score">
+                        <div class="worm-innings-label">Your Score</div>
+                        <div class="worm-innings-runs batting">${gameState.firstInningsScore.runs}</div>
+                    </div>
+                `;
+            }
+
+            // Update continue button
+            const continueBtn = document.getElementById('continueBtn');
+            continueBtn.textContent = isMatchComplete ? 'View Results' : 'Start Bowling';
+            continueBtn.onclick = () => continueFromInningsBreak(isMatchComplete);
+
+            showScreen('inningsBreakScreen');
+
+            // Draw the worm chart after a short delay
+            setTimeout(() => {
+                drawWormChart(isMatchComplete);
+            }, 100);
+        }
+
+        function continueFromInningsBreak(isMatchComplete) {
+            if (isMatchComplete) {
+                showSummary();
+            } else {
+                // Setup second innings
                 gameState.currentInnings = 2;
                 gameState.playerBatting = false;
                 gameState.ballCount = 0;
@@ -2042,18 +2386,152 @@
                 document.getElementById('bowlerLabel').textContent = 'Bowler';
 
                 updateScoreboard();
-
-                alert(`First innings complete! You scored ${gameState.firstInningsScore.runs} runs.\n\nNow you're bowling!`);
-
                 startQuestionPhase();
-            } else {
-                gameState.secondInningsScore = {
-                    runs: gameState.runs,
-                    wickets: gameState.wickets
-                };
-
-                showSummary();
             }
+        }
+
+        function drawWormChart(showBothInnings) {
+            const canvas = document.getElementById('wormCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Set canvas size
+            const wrapper = canvas.parentElement;
+            canvas.width = wrapper.clientWidth - 30;
+            canvas.height = 250;
+
+            const padding = { top: 20, right: 20, bottom: 30, left: 45 };
+            const chartWidth = canvas.width - padding.left - padding.right;
+            const chartHeight = canvas.height - padding.top - padding.bottom;
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Get data
+            const innings1 = gameState.wormData.innings1;
+            const innings2 = showBothInnings ? gameState.wormData.innings2 : [];
+
+            // Calculate max values
+            const allData = [...innings1, ...innings2];
+            const maxBalls = Math.max(
+                innings1.length,
+                innings2.length,
+                gameState.totalBalls
+            );
+            const maxRuns = Math.max(
+                ...allData.map(d => d.runs),
+                10
+            );
+
+            // Draw grid
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+
+            // Horizontal grid lines
+            const runStep = Math.ceil(maxRuns / 5);
+            for (let i = 0; i <= 5; i++) {
+                const y = padding.top + chartHeight - (i * chartHeight / 5);
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(padding.left + chartWidth, y);
+                ctx.stroke();
+
+                // Y-axis labels
+                ctx.fillStyle = '#666';
+                ctx.font = '11px Fredoka';
+                ctx.textAlign = 'right';
+                ctx.fillText(Math.round(i * runStep), padding.left - 8, y + 4);
+            }
+
+            // X-axis labels (balls/overs)
+            ctx.textAlign = 'center';
+            const ballStep = Math.ceil(maxBalls / 6);
+            for (let i = 0; i <= maxBalls; i += ballStep) {
+                const x = padding.left + (i / maxBalls) * chartWidth;
+                ctx.fillText(i, x, canvas.height - 8);
+            }
+
+            // Draw worm line function
+            function drawWormLine(data, color, markerColor) {
+                if (data.length === 0) return;
+
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                // Start at 0,0
+                ctx.beginPath();
+                let startX = padding.left;
+                let startY = padding.top + chartHeight;
+                ctx.moveTo(startX, startY);
+
+                // Draw line through all points
+                data.forEach((point, index) => {
+                    const x = padding.left + (point.ball / maxBalls) * chartWidth;
+                    const y = padding.top + chartHeight - (point.runs / (runStep * 5)) * chartHeight;
+                    ctx.lineTo(x, y);
+                });
+
+                ctx.stroke();
+
+                // Draw markers for wickets and sixes
+                data.forEach((point, index) => {
+                    const x = padding.left + (point.ball / maxBalls) * chartWidth;
+                    const y = padding.top + chartHeight - (point.runs / (runStep * 5)) * chartHeight;
+
+                    if (point.wicket) {
+                        // Wicket marker (red circle)
+                        ctx.beginPath();
+                        ctx.arc(x, y, 10, 0, Math.PI * 2);
+                        ctx.fillStyle = '#dc3545';
+                        ctx.fill();
+                        ctx.strokeStyle = '#a02020';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+
+                        // W text
+                        ctx.fillStyle = 'white';
+                        ctx.font = 'bold 10px Fredoka';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('W', x, y + 4);
+                    } else if (point.six) {
+                        // Six marker (green circle)
+                        ctx.beginPath();
+                        ctx.arc(x, y, 10, 0, Math.PI * 2);
+                        ctx.fillStyle = '#28a745';
+                        ctx.fill();
+                        ctx.strokeStyle = '#1e7e34';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+
+                        // 6 text
+                        ctx.fillStyle = 'white';
+                        ctx.font = 'bold 10px Fredoka';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('6', x, y + 4);
+                    }
+                });
+            }
+
+            // Draw first innings line (teal)
+            drawWormLine(innings1, '#00B4D8', '#00B4D8');
+
+            // Draw second innings line (orange) if showing both
+            if (showBothInnings && innings2.length > 0) {
+                drawWormLine(innings2, '#FF6B35', '#FF6B35');
+            }
+
+            // Draw axis labels
+            ctx.fillStyle = '#888';
+            ctx.font = '11px Fredoka';
+            ctx.textAlign = 'center';
+            ctx.fillText('Balls', padding.left + chartWidth / 2, canvas.height - 2);
+
+            ctx.save();
+            ctx.translate(12, padding.top + chartHeight / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Runs', 0, 0);
+            ctx.restore();
         }
 
         function showSummary() {
@@ -2102,6 +2580,7 @@
                 currentOver: 0,
                 ballsInOver: 0,
                 ballHistory: [],
+                wormData: { innings1: [], innings2: [] },
                 firstInningsScore: { runs: 0, wickets: 0 },
                 secondInningsScore: { runs: 0, wickets: 0 },
                 phase: 'difficulty',
