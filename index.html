@@ -2063,7 +2063,6 @@
                 <div style="padding-top: 20px;">
                     <div class="question-text" id="questionText"></div>
                     <div class="options-grid" id="questionOptions"></div>
-                    <button class="submit-btn" id="submitBtn" onclick="submitAnswer()" disabled>Submit Answer</button>
                 </div>
             </div>
 
@@ -2171,11 +2170,1380 @@
         <span class="sponsor-text">1992 Quiz Cricket</span>
     </div>
 
+    <script>
+        // Game Constants
+        const SCORING_OPTIONS = [0, 1, 2, 3, 4, 6];
+        const DISPLAY_ORDER = [4, 6, 2, 3, 0, 1];
+        const WICKET_PENALTY = 15;
+        const BALLS_PER_OVER = 6;
+        const COMPUTER_CORRECT_RATE = 0.66;
 
-    <!-- External JavaScript Files -->
-    <script src="js/config.js"></script>
-    <script src="js/data/questions.js"></script>
-    <script src="js/data/commentary.js"></script>
-    <script src="js/game.js"></script>
+        // 1992 World Cup Teams
+        const TEAMS = {
+            england: { name: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', flagClass: 'flag-eng', opponent: 'australia', available: true },
+            australia: { name: 'Australia', flag: '🇦🇺', flagClass: 'flag-aus', opponent: 'england', available: true },
+            india: { name: 'India', flag: '🇮🇳', flagClass: 'flag-ind', opponent: 'pakistan', available: true },
+            pakistan: { name: 'Pakistan', flag: '🇵🇰', flagClass: 'flag-pak', opponent: 'india', available: true },
+            newzealand: { name: 'New Zealand', flag: '🇳🇿', flagClass: 'flag-nzl', opponent: 'southafrica', available: false },
+            southafrica: { name: 'South Africa', flag: '🇿🇦', flagClass: 'flag-rsa', opponent: 'newzealand', available: false },
+            westindies: { name: 'West Indies', flag: '🌴', flagClass: 'flag-wi', opponent: 'srilanka', available: false },
+            srilanka: { name: 'Sri Lanka', flag: '🇱🇰', flagClass: 'flag-slk', opponent: 'westindies', available: false },
+            zimbabwe: { name: 'Zimbabwe', flag: '🇿🇼', flagClass: 'flag-zim', opponent: 'kenya', available: false }
+        };
+
+        // AI Strategies
+        const AI_STRATEGIES = {
+            easy: {
+                bowler: { name: 'Monty', dist: [17, 17, 17, 16, 17, 16] },
+                batsman: { name: 'Grace', dist: [5, 8, 13, 20, 28, 26] }
+            },
+            medium: {
+                bowler: { name: 'Kumble', dist: [18, 15, 15, 16, 18, 18] },
+                batsman: { name: 'Gavaskar', dist: [3, 5, 9, 18, 32, 33] }
+            },
+            hard: {
+                bowler: { name: 'Warne', dist: [12, 10, 12, 14, 23, 29] },
+                batsman: { name: 'Bradman', dist: [2, 4, 7, 15, 32, 40] }
+            },
+            legendary: {
+                bowler: { name: 'Murali', dist: [8, 8, 10, 12, 28, 34] },
+                batsman: { name: 'Tendulkar', dist: [1, 3, 5, 12, 34, 45] }
+            }
+        };
+
+        // Game State
+        let gameState = {
+            playerTeam: null,
+            opponentTeam: null,
+            difficulty: null,
+            overs: 3,
+            totalBalls: 18,
+            currentInnings: 1,
+            playerBatting: true,
+            ballCount: 0,
+            runs: 0,
+            wickets: 0,
+            currentOver: 0,
+            ballsInOver: 0,
+            // Ball history: {playerCorrect: bool, computerCorrect: bool, numberChosen: number, wicket: bool}
+            ballHistory: [],
+            // Worm data: array of {ball: number, runs: number, wicket: bool, six: bool} for each innings
+            wormData: { innings1: [], innings2: [] },
+            firstInningsScore: { runs: 0, wickets: 0 },
+            secondInningsScore: { runs: 0, wickets: 0 },
+            phase: 'welcome',
+            currentQuestion: null,
+            playerAnswer: null,
+            computerAnswer: null,
+            playerNumber: null,
+            computerNumber: null,
+            availableNumbers: [...SCORING_OPTIONS],
+            isNoBall: false,
+            usedQuestions: [],
+            isProcessing: false,
+            lastPlayerCorrect: false,
+            lastComputerCorrect: false
+        };
+
+        // Question Pool
+        const questions = [
+            { q: "What is the capital of France?", opts: ["Paris", "London", "Berlin", "Madrid"], correct: 0 },
+            { q: "Which river flows through Egypt?", opts: ["Amazon", "Nile", "Thames", "Ganges"], correct: 1 },
+            { q: "What is the largest ocean?", opts: ["Atlantic", "Indian", "Pacific", "Arctic"], correct: 2 },
+            { q: "Which country has the most people?", opts: ["USA", "India", "China", "Russia"], correct: 2 },
+            { q: "What is the capital of Japan?", opts: ["Seoul", "Beijing", "Tokyo", "Bangkok"], correct: 2 },
+            { q: "Which mountain is the tallest?", opts: ["K2", "Mount Everest", "Kilimanjaro", "Denali"], correct: 1 },
+            { q: "What is the capital of Australia?", opts: ["Sydney", "Melbourne", "Canberra", "Perth"], correct: 2 },
+            { q: "Which continent is the Sahara Desert in?", opts: ["Asia", "Africa", "Australia", "South America"], correct: 1 },
+            { q: "What ocean is west of the USA?", opts: ["Atlantic", "Pacific", "Arctic", "Indian"], correct: 1 },
+            { q: "Which country is shaped like a boot?", opts: ["Spain", "Greece", "Italy", "Portugal"], correct: 2 },
+            { q: "What is the smallest continent?", opts: ["Europe", "Antarctica", "Australia", "South America"], correct: 2 },
+            { q: "Which city is called the Big Apple?", opts: ["Los Angeles", "Chicago", "New York", "Boston"], correct: 2 },
+            { q: "What gas do plants need for photosynthesis?", opts: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"], correct: 2 },
+            { q: "What is the smallest unit of life?", opts: ["Atom", "Cell", "Molecule", "Tissue"], correct: 1 },
+            { q: "How many bones does an adult human have?", opts: ["186", "206", "226", "246"], correct: 1 },
+            { q: "What is H2O?", opts: ["Oxygen", "Hydrogen", "Water", "Salt"], correct: 2 },
+            { q: "What planet is closest to the Sun?", opts: ["Venus", "Mars", "Mercury", "Earth"], correct: 2 },
+            { q: "What force keeps us on Earth?", opts: ["Magnetism", "Electricity", "Gravity", "Friction"], correct: 2 },
+            { q: "How many players on a basketball team (on court)?", opts: ["4", "5", "6", "7"], correct: 1 },
+            { q: "What sport is played at Wimbledon?", opts: ["Cricket", "Tennis", "Golf", "Rugby"], correct: 1 },
+            { q: "How many players on a football team?", opts: ["9", "10", "11", "12"], correct: 2 },
+            { q: "What color are the goalposts in rugby?", opts: ["Yellow", "White", "Red", "Blue"], correct: 1 },
+            { q: "How many Olympic rings are there?", opts: ["4", "5", "6", "7"], correct: 1 },
+            { q: "In cricket, how many stumps are there?", opts: ["2", "3", "4", "5"], correct: 1 },
+            { q: "Who wrote Romeo and Juliet?", opts: ["Dickens", "Shakespeare", "Austen", "Tolkien"], correct: 1 },
+            { q: "When did World War II end?", opts: ["1943", "1944", "1945", "1946"], correct: 2 },
+            { q: "Who was the first US President?", opts: ["Jefferson", "Washington", "Lincoln", "Adams"], correct: 1 },
+            { q: "When did humans first land on the Moon?", opts: ["1965", "1967", "1969", "1971"], correct: 2 },
+            { q: "Who painted the Mona Lisa?", opts: ["Picasso", "Van Gogh", "Da Vinci", "Michelangelo"], correct: 2 },
+            { q: "Which ancient wonder still stands?", opts: ["Colossus", "Pyramids of Giza", "Hanging Gardens", "Lighthouse"], correct: 1 },
+            { q: "What is 12 × 8?", opts: ["84", "92", "96", "104"], correct: 2 },
+            { q: "What is 50% of 200?", opts: ["50", "75", "100", "125"], correct: 2 },
+            { q: "What is the square root of 64?", opts: ["6", "7", "8", "9"], correct: 2 },
+            { q: "What is 15 + 27?", opts: ["40", "41", "42", "43"], correct: 2 },
+            { q: "How many sides does a hexagon have?", opts: ["5", "6", "7", "8"], correct: 1 },
+            { q: "What is 9 × 7?", opts: ["54", "56", "63", "72"], correct: 2 },
+            { q: "What is the capital of Spain?", opts: ["Barcelona", "Madrid", "Seville", "Valencia"], correct: 1 }
+        ];
+
+        // Utility Functions
+        function weightedRandom(weights) {
+            const total = weights.reduce((a, b) => a + b, 0);
+            let random = Math.random() * total;
+            for (let i = 0; i < weights.length; i++) {
+                random -= weights[i];
+                if (random <= 0) return i;
+            }
+            return weights.length - 1;
+        }
+
+        function getComputerNumber(isBatting, availableNumbers) {
+            const strategy = isBatting
+                ? AI_STRATEGIES[gameState.difficulty].batsman
+                : AI_STRATEGIES[gameState.difficulty].bowler;
+
+            if (availableNumbers.length === 2 && availableNumbers[0] === 0 && availableNumbers[1] === 1) {
+                return Math.random() < 0.5 ? 0 : 1;
+            }
+
+            const index = weightedRandom(strategy.dist);
+            return SCORING_OPTIONS[index];
+        }
+
+        function getRandomQuestion() {
+            const availableIndices = [];
+            for (let i = 0; i < questions.length; i++) {
+                if (!gameState.usedQuestions.includes(i)) {
+                    availableIndices.push(i);
+                }
+            }
+
+            if (availableIndices.length === 0) {
+                gameState.usedQuestions = [];
+                for (let i = 0; i < questions.length; i++) {
+                    availableIndices.push(i);
+                }
+            }
+
+            const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+            gameState.usedQuestions.push(randomIndex);
+            return questions[randomIndex];
+        }
+
+        function computerAnswersCorrectly() {
+            return Math.random() < COMPUTER_CORRECT_RATE;
+        }
+
+        // Cricket jargon commentary with variations
+        function getRunsCommentary(runs, battingTeam, bowlingTeam) {
+            const commentaries = {
+                0: [
+                    `Dot ball! Well bowled by ${bowlingTeam}.`,
+                    `Nothing doing there. Tight bowling.`,
+                    `Defended solidly. No run.`,
+                    `${bowlingTeam} keep it tight. Dot ball.`,
+                    `Good length, well left. No run.`
+                ],
+                1: [
+                    `Quick single taken by ${battingTeam}.`,
+                    `Nudged away for one. Smart cricket.`,
+                    `${battingTeam} rotate the strike. One run.`,
+                    `Pushed into the gap. They take a single.`,
+                    `Dab and run. Good running between the wickets.`
+                ],
+                2: [
+                    `${battingTeam} ran hard for two!`,
+                    `Worked away nicely. Two runs.`,
+                    `Placed into the gap. They come back for the second.`,
+                    `Good running! Two to ${battingTeam}.`,
+                    `Punched through the covers for a brace.`
+                ],
+                3: [
+                    `Pushing for three! ${battingTeam} want every run.`,
+                    `Three runs! Great hustle between the wickets.`,
+                    `Into the deep and they're back for three.`,
+                    `${battingTeam} turn two into three. Excellent running!`,
+                    `Driven to the boundary... but cut off! Three runs.`
+                ],
+                4: [
+                    `FOUR! Cracking shot by ${battingTeam}!`,
+                    `That's racing away to the boundary! Four runs.`,
+                    `FOUR! Timed to perfection.`,
+                    `Pierced the field beautifully. FOUR!`,
+                    `Sweetly struck! Four runs to ${battingTeam}.`
+                ],
+                6: [
+                    `SIX! That's a maximum! ${battingTeam} launch it!`,
+                    `HUGE! That's gone all the way! Six runs.`,
+                    `Into the stands! Maximum from ${battingTeam}!`,
+                    `SIX! Cleared the rope with ease!`,
+                    `That's massive! Six runs. The crowd goes wild!`
+                ]
+            };
+
+            const options = commentaries[runs] || [`${runs} run${runs === 1 ? '' : 's'} to ${battingTeam}.`];
+            return options[Math.floor(Math.random() * options.length)];
+        }
+
+        // UI Functions
+        function showScreen(screenId) {
+            ['welcomeScreen', 'countryScreen', 'difficultyScreen', 'durationScreen', 'questionScreen', 'deliveryScreen', 'resultScreen', 'inningsBreakScreen', 'summaryScreen']
+                .forEach(id => document.getElementById(id).classList.add('hidden'));
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function flipTransition(fromScreenId, toScreenId, callback) {
+            const fromScreen = document.getElementById(fromScreenId);
+            const toScreen = document.getElementById(toScreenId);
+
+            // Flip out the current screen
+            fromScreen.classList.add('flip-out');
+
+            setTimeout(() => {
+                // Hide the old screen and show the new one
+                fromScreen.classList.add('hidden');
+                fromScreen.classList.remove('flip-out');
+
+                toScreen.classList.remove('hidden');
+                toScreen.classList.add('flip-in');
+
+                setTimeout(() => {
+                    toScreen.classList.remove('flip-in');
+                    if (callback) callback();
+                }, 300);
+            }, 300);
+        }
+
+        function updateScoreboard() {
+            // Main score format: "X runs"
+            document.getElementById('mainScore').textContent = `${gameState.runs} runs`;
+
+            // Balls played
+            document.getElementById('scoreBalls').textContent = `(${gameState.ballCount} balls)`;
+
+            if (gameState.currentInnings === 2) {
+                // Second innings (bowling): show target and balls remaining
+                const target = gameState.firstInningsScore.runs + 1;
+                const ballsRemaining = gameState.totalBalls - gameState.ballCount;
+                document.getElementById('wicketsDisplay').textContent = `Target: ${target}`;
+                document.getElementById('oversDisplay').textContent = `Balls left: ${ballsRemaining}`;
+            } else {
+                // First innings (batting): show wickets and overs
+                document.getElementById('wicketsDisplay').textContent = `Wickets: ${gameState.wickets}`;
+                const overNum = Math.floor(gameState.ballCount / BALLS_PER_OVER);
+                const ballNum = gameState.ballCount % BALLS_PER_OVER;
+                document.getElementById('oversDisplay').textContent = `Overs: ${overNum}.${ballNum}`;
+            }
+
+            updateBallHistory();
+        }
+
+        function updateBallHistory() {
+            const batsmanBalls = document.getElementById('batsmanBalls');
+            const bowlerBalls = document.getElementById('bowlerBalls');
+
+            batsmanBalls.innerHTML = '';
+            bowlerBalls.innerHTML = '';
+
+            // Show last 6 balls
+            const startIdx = Math.max(0, gameState.ballHistory.length - 6);
+
+            for (let i = 0; i < 6; i++) {
+                const ballIdx = startIdx + i;
+                const batsmanDot = document.createElement('div');
+                const bowlerDot = document.createElement('div');
+
+                batsmanDot.className = 'ball-dot';
+                bowlerDot.className = 'ball-dot';
+
+                if (ballIdx < gameState.ballHistory.length) {
+                    const ball = gameState.ballHistory[ballIdx];
+
+                    // Batsman side shows batsman's correctness
+                    // Bowler side shows bowler's correctness
+                    // When player is batting: batsman=player, bowler=computer
+                    // When player is bowling: batsman=computer, bowler=player
+                    const batsmanCorrect = gameState.playerBatting
+                        ? ball.playerCorrect
+                        : ball.computerCorrect;
+                    const bowlerCorrect = gameState.playerBatting
+                        ? ball.computerCorrect
+                        : ball.playerCorrect;
+
+                    batsmanDot.classList.add(batsmanCorrect ? 'correct' : 'wrong');
+                    bowlerDot.classList.add(bowlerCorrect ? 'correct' : 'wrong');
+
+                    // Content: W for wicket, number otherwise
+                    const content = ball.wicket ? 'W' : ball.numberChosen;
+                    batsmanDot.textContent = content;
+                    bowlerDot.textContent = content;
+                } else if (ballIdx === gameState.ballHistory.length && gameState.phase !== 'difficulty') {
+                    batsmanDot.classList.add('current');
+                    batsmanDot.textContent = '?';
+                    bowlerDot.classList.add('current');
+                    bowlerDot.textContent = '?';
+                }
+
+                batsmanBalls.appendChild(batsmanDot);
+                bowlerBalls.appendChild(bowlerDot);
+            }
+        }
+
+        function updateOversDisplay() {
+            const overs = document.getElementById('oversSlider').value;
+            const plural = overs == 1 ? 'Over' : 'Overs';
+            document.getElementById('oversValue').textContent = `${overs} ${plural}`;
+
+            // Calculate time estimate (75 seconds per over, 2 innings)
+            const totalSeconds = overs * 75 * 2;
+            const minutes = Math.floor(totalSeconds / 60);
+            const maxMinutes = minutes + Math.ceil(minutes * 0.15); // Add 15% buffer
+            document.getElementById('timeEstimate').textContent = `Approx. ${minutes}-${maxMinutes} minutes`;
+        }
+
+        // Populate country grid on load
+        function populateCountryGrid() {
+            const grid = document.getElementById('countryGrid');
+            grid.innerHTML = '';
+
+            Object.entries(TEAMS).forEach(([key, team]) => {
+                const btn = document.createElement('button');
+                btn.className = 'country-btn';
+
+                if (team.available) {
+                    btn.innerHTML = `
+                        <span class="country-flag">${team.flag}</span>
+                        <span class="country-name">${team.name}</span>
+                    `;
+                    btn.onclick = () => selectCountry(key);
+                } else {
+                    btn.disabled = true;
+                    btn.className = 'country-btn coming-soon';
+                    btn.innerHTML = `
+                        <span class="country-flag">${team.flag}</span>
+                        <span class="country-name">${team.name}</span>
+                        <span class="coming-soon-badge">Coming Soon</span>
+                        <div class="coming-soon-tooltip">${team.name} coming in a future update!</div>
+                    `;
+                    btn.onclick = (e) => toggleComingSoonTooltip(e, btn);
+                }
+
+                grid.appendChild(btn);
+            });
+        }
+
+        function toggleComingSoonTooltip(event, btn) {
+            event.preventDefault();
+            btn.classList.toggle('show-tooltip');
+            setTimeout(() => btn.classList.remove('show-tooltip'), 2000);
+        }
+
+        // Navigation Functions
+        function goToCountrySelect() {
+            populateCountryGrid();
+            showScreen('countryScreen');
+        }
+
+        function selectCountry(countryKey) {
+            gameState.playerTeam = countryKey;
+            gameState.opponentTeam = TEAMS[countryKey].opponent;
+            showScreen('difficultyScreen');
+        }
+
+        // Game Flow Functions
+        function selectDifficulty(difficulty) {
+            gameState.difficulty = difficulty;
+
+            // Update match preview with CSS flags
+            const playerTeam = TEAMS[gameState.playerTeam];
+            const opponentTeam = TEAMS[gameState.opponentTeam];
+            document.getElementById('matchPreviewTeams').innerHTML =
+                `<div class="css-flag ${playerTeam.flagClass}" style="display:inline-block;vertical-align:middle;margin-right:8px;"></div>${playerTeam.name} vs ${opponentTeam.name}<div class="css-flag ${opponentTeam.flagClass}" style="display:inline-block;vertical-align:middle;margin-left:8px;"></div>`;
+
+            const difficultyNames = { easy: 'Easy', medium: 'Medium', hard: 'Hard', legendary: 'Legendary' };
+            document.getElementById('matchPreviewDifficulty').textContent = `${difficultyNames[difficulty]} Difficulty`;
+
+            // Update time estimate for default slider value
+            updateOversDisplay();
+
+            showScreen('durationScreen');
+        }
+
+        function startMatch() {
+            gameState.overs = parseInt(document.getElementById('oversSlider').value);
+            gameState.totalBalls = gameState.overs * BALLS_PER_OVER;
+            gameState.phase = 'question';
+
+            document.body.classList.add('gameplay');
+            document.getElementById('welcomeHeader').classList.add('hidden');
+            document.getElementById('scorebug').classList.remove('hidden');
+
+            // Set labels with team names
+            const playerTeam = TEAMS[gameState.playerTeam];
+            const opponentTeam = TEAMS[gameState.opponentTeam];
+
+            document.getElementById('batsmanLabel').textContent = `${playerTeam.flag} ${playerTeam.name}`;
+            document.getElementById('bowlerLabel').textContent = `${opponentTeam.name} ${opponentTeam.flag}`;
+
+            updateScoreboard();
+            startQuestionPhase();
+        }
+
+        function startQuestionPhase() {
+            gameState.currentQuestion = getRandomQuestion();
+            gameState.playerAnswer = null;
+            gameState.computerAnswer = null;
+            gameState.availableNumbers = [...SCORING_OPTIONS];
+            gameState.isNoBall = false;
+            gameState.isProcessing = false;
+            gameState.phase = 'question';
+
+            document.getElementById('questionText').textContent = gameState.currentQuestion.q;
+
+            const optionsContainer = document.getElementById('questionOptions');
+            optionsContainer.innerHTML = '';
+
+            gameState.currentQuestion.opts.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.onclick = () => selectAnswer(index);
+                optionsContainer.appendChild(btn);
+            });
+
+            updateBallHistory();
+            showScreen('questionScreen');
+        }
+
+        function selectAnswer(index) {
+            if (gameState.isProcessing) return;
+            gameState.isProcessing = true;
+
+            gameState.playerAnswer = index;
+
+            // Check if answer is correct
+            const isCorrect = index === gameState.currentQuestion.correct;
+
+            // Highlight the selected option with correct/wrong color
+            document.querySelectorAll('.option-btn').forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === index) {
+                    btn.classList.add(isCorrect ? 'correct-answer' : 'wrong-answer');
+                }
+                // Show correct answer with tick if user got it wrong
+                if (!isCorrect && i === gameState.currentQuestion.correct) {
+                    btn.classList.add('show-correct');
+                }
+            });
+
+            // Transition to delivery phase after feedback
+            setTimeout(() => {
+                submitAnswer();
+            }, 600);
+        }
+
+        function submitAnswer() {
+            const computerCorrect = computerAnswersCorrectly();
+            gameState.computerAnswer = computerCorrect
+                ? gameState.currentQuestion.correct
+                : (gameState.currentQuestion.correct + 1 + Math.floor(Math.random() * 3)) % 4;
+
+            const playerCorrect = gameState.playerAnswer === gameState.currentQuestion.correct;
+            const computerAnswerCorrect = gameState.computerAnswer === gameState.currentQuestion.correct;
+
+            // Store whether player and computer got question correct
+            gameState.lastPlayerCorrect = playerCorrect;
+            gameState.lastComputerCorrect = computerAnswerCorrect;
+
+            const bowlerCorrect = gameState.playerBatting ? computerAnswerCorrect : playerCorrect;
+            const batsmanCorrect = gameState.playerBatting ? playerCorrect : computerAnswerCorrect;
+
+            gameState.isNoBall = !bowlerCorrect;
+
+            // Batsman limited to 0,1 if they got the question wrong (regardless of bowler)
+            if (!batsmanCorrect) {
+                gameState.availableNumbers = [0, 1];
+            } else {
+                gameState.availableNumbers = [...SCORING_OPTIONS];
+            }
+
+            setTimeout(() => {
+                startDeliveryPhase();
+            }, 600);
+        }
+
+        // Status messages for delivery phase
+        const CORRECT_MESSAGES = [
+            "Question correct! Play your shots!",
+            "Well answered! Time to score!",
+            "Correct! Pick your runs!",
+            "Right answer! Go big or go home!",
+            "Nailed it! Take your pick!"
+        ];
+
+        const INCORRECT_MESSAGES = [
+            "Question incorrect. Defend for your life!",
+            "Wrong answer! Time to survive!",
+            "Incorrect! Play it safe!",
+            "Missed it! Defend or perish!",
+            "Wrong! Block it out!"
+        ];
+
+        function startDeliveryPhase() {
+            gameState.isProcessing = false;
+            gameState.phase = 'delivery';
+
+            const numbersContainer = document.getElementById('numberOptions');
+            numbersContainer.innerHTML = '';
+
+            const playerAvailableNumbers = gameState.playerBatting
+                ? gameState.availableNumbers
+                : SCORING_OPTIONS;
+
+            const isLimited = playerAvailableNumbers.length === 2;
+
+            // Show status message
+            const statusEl = document.getElementById('deliveryStatus');
+            if (gameState.playerBatting) {
+                if (isLimited) {
+                    statusEl.className = 'delivery-status incorrect';
+                    statusEl.textContent = INCORRECT_MESSAGES[Math.floor(Math.random() * INCORRECT_MESSAGES.length)];
+                } else {
+                    statusEl.className = 'delivery-status correct';
+                    statusEl.textContent = CORRECT_MESSAGES[Math.floor(Math.random() * CORRECT_MESSAGES.length)];
+                }
+            } else {
+                // When bowling, show based on player's question result
+                if (gameState.lastPlayerCorrect) {
+                    statusEl.className = 'delivery-status correct';
+                    statusEl.textContent = "What do you think the batsman will play?";
+                } else {
+                    statusEl.className = 'delivery-status incorrect';
+                    statusEl.innerHTML = `Incorrect answer - No Ball! <span class="info-icon" onclick="showExplainer(event)">?</span>`;
+                }
+            }
+
+            DISPLAY_ORDER.forEach(num => {
+                const btn = document.createElement('button');
+                btn.className = 'number-btn';
+                btn.textContent = num;
+
+                const isAvailable = playerAvailableNumbers.includes(num);
+
+                if (isAvailable) {
+                    btn.onclick = () => selectNumber(num);
+                } else {
+                    btn.disabled = true;
+                }
+
+                numbersContainer.appendChild(btn);
+            });
+
+            flipTransition('questionScreen', 'deliveryScreen');
+        }
+
+        function selectNumber(num) {
+            if (gameState.isProcessing) return;
+            gameState.isProcessing = true;
+
+            document.querySelectorAll('.number-btn').forEach(btn => btn.disabled = true);
+
+            gameState.playerNumber = num;
+
+            if (gameState.playerBatting) {
+                gameState.computerNumber = getComputerNumber(false, SCORING_OPTIONS);
+            } else {
+                const computerNumbers = gameState.availableNumbers.length === 2 ? [0, 1] : SCORING_OPTIONS;
+                gameState.computerNumber = getComputerNumber(true, computerNumbers);
+            }
+
+            processDelivery();
+        }
+
+        function processDelivery() {
+            const numbersMatch = gameState.playerNumber === gameState.computerNumber;
+            let commentary = '';
+            let isWicket = false;
+            let runsScored = 0;
+
+            const batsmanNum = gameState.playerBatting ? gameState.playerNumber : gameState.computerNumber;
+            const bowlerNum = gameState.playerBatting ? gameState.computerNumber : gameState.playerNumber;
+            const playerNumberChosen = gameState.playerNumber;
+
+            // Get team names for commentary
+            const playerTeam = TEAMS[gameState.playerTeam];
+            const opponentTeam = TEAMS[gameState.opponentTeam];
+            const battingTeam = gameState.playerBatting ? playerTeam : opponentTeam;
+            const bowlingTeam = gameState.playerBatting ? opponentTeam : playerTeam;
+
+            if (gameState.playerBatting) {
+                if (numbersMatch && !gameState.isNoBall) {
+                    isWicket = true;
+                    gameState.wickets++;
+                    gameState.runs = Math.max(0, gameState.runs - WICKET_PENALTY);
+                    commentary = `OUT! Bowled by ${bowlingTeam.name}! -${WICKET_PENALTY} runs penalty.`;
+                } else if (numbersMatch && gameState.isNoBall) {
+                    commentary = `WICKET!! ...Oh wait, NO BALL! ${battingTeam.name} survive! 0 runs.`;
+                } else {
+                    runsScored = gameState.playerNumber;
+                    gameState.runs += runsScored;
+                    commentary = getRunsCommentary(runsScored, battingTeam.name, bowlingTeam.name);
+                }
+            } else {
+                if (numbersMatch && !gameState.isNoBall) {
+                    isWicket = true;
+                    gameState.wickets++;
+                    gameState.runs = Math.max(0, gameState.runs - WICKET_PENALTY);
+                    commentary = `WICKET! Great bowling by ${bowlingTeam.name}! -${WICKET_PENALTY} runs.`;
+                } else if (numbersMatch && gameState.isNoBall) {
+                    commentary = `GOT HIM!! ...No wait, NO BALL! ${battingTeam.name} survive! 0 runs.`;
+                } else {
+                    runsScored = gameState.computerNumber;
+                    gameState.runs += runsScored;
+                    commentary = getRunsCommentary(runsScored, battingTeam.name, bowlingTeam.name);
+                }
+            }
+
+            // Record ball in history with both player and computer correctness
+            gameState.ballHistory.push({
+                playerCorrect: gameState.lastPlayerCorrect,
+                computerCorrect: gameState.lastComputerCorrect,
+                numberChosen: playerNumberChosen,
+                wicket: isWicket
+            });
+
+            // Track worm data for the chart
+            const isSix = (gameState.playerBatting && runsScored === 6) ||
+                          (!gameState.playerBatting && runsScored === 6);
+            const wormKey = gameState.currentInnings === 1 ? 'innings1' : 'innings2';
+            gameState.wormData[wormKey].push({
+                ball: gameState.ballCount + 1,
+                runs: gameState.runs,
+                wicket: isWicket,
+                six: isSix
+            });
+
+            gameState.ballCount++;
+            gameState.ballsInOver++;
+
+            if (gameState.ballsInOver === BALLS_PER_OVER) {
+                gameState.ballsInOver = 0;
+                gameState.currentOver++;
+            }
+
+            updateScoreboard();
+            showResult(commentary, isWicket, batsmanNum, bowlerNum);
+        }
+
+        function showResult(commentary, isWicket, batsmanNum, bowlerNum) {
+            gameState.phase = 'result';
+
+            // Determine who got the question correct
+            // When player is batting: batsman=player, bowler=computer
+            // When player is bowling: batsman=computer, bowler=player
+            const batsmanCorrect = gameState.playerBatting
+                ? gameState.lastPlayerCorrect
+                : gameState.lastComputerCorrect;
+            const bowlerCorrect = gameState.playerBatting
+                ? gameState.lastComputerCorrect
+                : gameState.lastPlayerCorrect;
+
+            // Reset all animation classes
+            const batsmanCircle = document.getElementById('batsmanCircle');
+            const bowlerCircle = document.getElementById('bowlerCircle');
+            const batsmanNumberEl = document.getElementById('batsmanNumber');
+            const bowlerNumberEl = document.getElementById('bowlerNumber');
+            const batsmanLabel = document.getElementById('batsmanRevealLabel');
+            const bowlerLabel = document.getElementById('bowlerRevealLabel');
+            const vsDivider = document.getElementById('vsDivider');
+            const banner = document.getElementById('commentaryBanner');
+            const commentaryText = document.getElementById('commentaryText');
+            const nextBtn = document.getElementById('nextBallBtn');
+
+            // Clear previous animations
+            batsmanCircle.classList.remove('animate-in', 'correct', 'wrong');
+            bowlerCircle.classList.remove('animate-in', 'correct', 'wrong');
+            batsmanNumberEl.classList.remove('animate-in', 'wicket-text');
+            bowlerNumberEl.classList.remove('animate-in', 'wicket-text');
+            batsmanLabel.classList.remove('animate-in');
+            bowlerLabel.classList.remove('animate-in');
+            vsDivider.classList.remove('animate-in');
+            banner.classList.remove('animate-in', 'wicket');
+            nextBtn.classList.remove('animate-in');
+
+            // Reset states
+            batsmanCircle.style.opacity = '0';
+            batsmanCircle.style.transform = 'scale(0)';
+            bowlerCircle.style.opacity = '0';
+            bowlerCircle.style.transform = 'scale(0)';
+            batsmanNumberEl.style.opacity = '0';
+            batsmanNumberEl.style.transform = 'scale(0)';
+            bowlerNumberEl.style.opacity = '0';
+            bowlerNumberEl.style.transform = 'scale(0)';
+            batsmanLabel.style.opacity = '0';
+            bowlerLabel.style.opacity = '0';
+            vsDivider.style.opacity = '0';
+            banner.style.opacity = '0';
+            nextBtn.style.opacity = '0';
+            commentaryText.innerHTML = '';
+
+            // Set colors based on question correctness
+            batsmanCircle.classList.add(batsmanCorrect ? 'correct' : 'wrong');
+            bowlerCircle.classList.add(bowlerCorrect ? 'correct' : 'wrong');
+
+            // Set the numbers (hidden initially)
+            batsmanNumberEl.textContent = batsmanNum;
+            bowlerNumberEl.textContent = bowlerNum;
+
+            // Set wicket banner style
+            if (isWicket) {
+                banner.classList.add('wicket');
+                document.getElementById('commentaryHeader').textContent = 'WICKET!';
+            } else {
+                document.getElementById('commentaryHeader').textContent = 'Comms';
+            }
+
+            showScreen('resultScreen');
+
+            // STAGE 1: Batsman circle reveals (color only, no number)
+            setTimeout(() => {
+                batsmanCircle.style.opacity = '';
+                batsmanCircle.style.transform = '';
+                batsmanCircle.classList.add('animate-in');
+                batsmanLabel.classList.add('animate-in');
+            }, 100);
+
+            // STAGE 2: Bowler circle reveals (color only, no number)
+            setTimeout(() => {
+                bowlerCircle.style.opacity = '';
+                bowlerCircle.style.transform = '';
+                bowlerCircle.classList.add('animate-in');
+                bowlerLabel.classList.add('animate-in');
+            }, 400);
+
+            // STAGE 3: Numbers counter-animate in
+            setTimeout(() => {
+                // Counter animation for batsman
+                animateNumberCounter(batsmanNumberEl, batsmanNum);
+                // Counter animation for bowler
+                animateNumberCounter(bowlerNumberEl, bowlerNum);
+                // VS divider
+                vsDivider.classList.add('animate-in');
+            }, 800);
+
+            // STAGE 4: Commentary banner with typewriter
+            setTimeout(() => {
+                banner.style.opacity = '';
+                banner.style.transform = '';
+                banner.classList.add('animate-in');
+
+                // Typewriter effect
+                setTimeout(() => {
+                    typewriterEffect(commentaryText, commentary);
+                }, 300);
+            }, 1200);
+
+            // STAGE 5: Next button appears
+            setTimeout(() => {
+                nextBtn.style.opacity = '';
+                nextBtn.style.transform = '';
+                nextBtn.classList.add('animate-in');
+            }, 1800 + (commentary.length * 30));
+        }
+
+        // Counter animation for numbers
+        function animateNumberCounter(element, finalValue) {
+            element.style.opacity = '';
+            element.style.transform = '';
+
+            const numValue = parseInt(finalValue);
+            if (isNaN(numValue)) {
+                // It's "W" for wicket or similar
+                element.textContent = finalValue;
+                element.classList.add('animate-in', 'wicket-text');
+                return;
+            }
+
+            // Counter effect - cycle through numbers quickly
+            let count = 0;
+            const duration = 400;
+            const steps = 8;
+            const stepTime = duration / steps;
+
+            element.classList.add('animate-in');
+
+            const interval = setInterval(() => {
+                count++;
+                if (count < steps) {
+                    // Random number cycling
+                    element.textContent = SCORING_OPTIONS[Math.floor(Math.random() * SCORING_OPTIONS.length)];
+                } else {
+                    // Final value
+                    element.textContent = finalValue;
+                    clearInterval(interval);
+                }
+            }, stepTime);
+        }
+
+        // Typewriter effect for commentary
+        function typewriterEffect(element, text) {
+            element.innerHTML = '';
+            let index = 0;
+            const speed = 25; // ms per character
+
+            const span = document.createElement('span');
+            span.className = 'typewriter';
+            element.appendChild(span);
+
+            function type() {
+                if (index < text.length) {
+                    span.textContent = text.substring(0, index + 1);
+                    index++;
+                    setTimeout(type, speed);
+                }
+            }
+
+            type();
+        }
+
+        function nextBall() {
+            if (gameState.ballCount >= gameState.totalBalls) {
+                endInnings();
+            } else {
+                startQuestionPhase();
+            }
+        }
+
+        function endInnings() {
+            if (gameState.currentInnings === 1) {
+                gameState.firstInningsScore = {
+                    runs: gameState.runs,
+                    wickets: gameState.wickets
+                };
+
+                // Show innings break with worm chart
+                showInningsBreak(false);
+            } else {
+                gameState.secondInningsScore = {
+                    runs: gameState.runs,
+                    wickets: gameState.wickets
+                };
+
+                // Show final worm chart before summary
+                showInningsBreak(true);
+            }
+        }
+
+        function showInningsBreak(isMatchComplete) {
+            gameState.phase = 'inningsBreak';
+
+            // Update title
+            const title = document.getElementById('wormTitle');
+            title.textContent = isMatchComplete ? 'Match Summary' : '1st Innings';
+
+            // Update badges with team names and CSS flags
+            const playerTeam = TEAMS[gameState.playerTeam];
+            const opponentTeam = TEAMS[gameState.opponentTeam];
+            document.getElementById('wormBatBadge').innerHTML = `<div class="css-flag ${playerTeam.flagClass}"></div>${playerTeam.name}`;
+            document.getElementById('wormBowlBadge').innerHTML = `${opponentTeam.name}<div class="css-flag ${opponentTeam.flagClass}"></div>`;
+
+            // Update legend for match complete (show both innings)
+            const legend = document.getElementById('wormLegend');
+            if (isMatchComplete) {
+                legend.innerHTML = `
+                    <div class="legend-item">
+                        <div class="legend-line innings1"></div>
+                        <span><div class="css-flag ${playerTeam.flagClass}" style="display:inline-block;vertical-align:middle;margin-right:4px;"></div>${playerTeam.name}</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-line innings2"></div>
+                        <span><div class="css-flag ${opponentTeam.flagClass}" style="display:inline-block;vertical-align:middle;margin-right:4px;"></div>${opponentTeam.name}</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot six"></div>
+                        <span>Six</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot wicket"></div>
+                        <span>Wicket</span>
+                    </div>
+                `;
+            } else {
+                legend.innerHTML = `
+                    <div class="legend-item">
+                        <div class="legend-line innings1"></div>
+                        <span><div class="css-flag ${playerTeam.flagClass}" style="display:inline-block;vertical-align:middle;margin-right:4px;"></div>${playerTeam.name}</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot six"></div>
+                        <span>Six</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot wicket"></div>
+                        <span>Wicket</span>
+                    </div>
+                `;
+            }
+
+            // Update summary section
+            const summary = document.getElementById('wormSummary');
+            if (isMatchComplete) {
+                summary.innerHTML = `
+                    <div class="worm-innings-score">
+                        <div class="worm-innings-label"><div class="css-flag ${playerTeam.flagClass}" style="display:inline-block;vertical-align:middle;margin-right:6px;"></div>${playerTeam.name}</div>
+                        <div class="worm-innings-runs batting">${gameState.firstInningsScore.runs}</div>
+                    </div>
+                    <div class="worm-innings-score">
+                        <div class="worm-innings-label"><div class="css-flag ${opponentTeam.flagClass}" style="display:inline-block;vertical-align:middle;margin-right:6px;"></div>${opponentTeam.name}</div>
+                        <div class="worm-innings-runs bowling">${gameState.secondInningsScore.runs}</div>
+                    </div>
+                `;
+            } else {
+                summary.innerHTML = `
+                    <div class="worm-innings-score">
+                        <div class="worm-innings-label"><div class="css-flag ${playerTeam.flagClass}" style="display:inline-block;vertical-align:middle;margin-right:6px;"></div>${playerTeam.name}</div>
+                        <div class="worm-innings-runs batting">${gameState.firstInningsScore.runs}</div>
+                    </div>
+                `;
+            }
+
+            // Update continue button
+            const continueBtn = document.getElementById('continueBtn');
+            continueBtn.textContent = isMatchComplete ? 'View Results' : 'Start Bowling';
+            continueBtn.onclick = () => continueFromInningsBreak(isMatchComplete);
+
+            showScreen('inningsBreakScreen');
+
+            // Draw the worm chart after layout is complete
+            // Use double requestAnimationFrame to ensure the browser has laid out the screen
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    drawWormChart(isMatchComplete);
+                });
+            });
+        }
+
+        function continueFromInningsBreak(isMatchComplete) {
+            if (isMatchComplete) {
+                showSummary();
+            } else {
+                // Setup second innings
+                gameState.currentInnings = 2;
+                gameState.playerBatting = false;
+                gameState.ballCount = 0;
+                gameState.runs = 0;
+                gameState.wickets = 0;
+                gameState.currentOver = 0;
+                gameState.ballsInOver = 0;
+                gameState.ballHistory = [];
+
+                const playerTeam = TEAMS[gameState.playerTeam];
+                const opponentTeam = TEAMS[gameState.opponentTeam];
+                document.getElementById('batsmanLabel').textContent = `${opponentTeam.flag} ${opponentTeam.name}`;
+                document.getElementById('bowlerLabel').textContent = `${playerTeam.name} ${playerTeam.flag}`;
+
+                updateScoreboard();
+                startQuestionPhase();
+            }
+        }
+
+        function drawWormChart(showBothInnings) {
+            const canvas = document.getElementById('wormCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Set canvas size
+            const wrapper = canvas.parentElement;
+            const wrapperWidth = wrapper.clientWidth;
+
+            // Safety check: if wrapper has no width yet, retry after a delay
+            if (wrapperWidth < 50) {
+                setTimeout(() => drawWormChart(showBothInnings), 50);
+                return;
+            }
+
+            canvas.width = wrapperWidth - 30;
+            canvas.height = 250;
+
+            const padding = { top: 20, right: 20, bottom: 30, left: 45 };
+            const chartWidth = canvas.width - padding.left - padding.right;
+            const chartHeight = canvas.height - padding.top - padding.bottom;
+
+            // Get data
+            const innings1 = gameState.wormData.innings1;
+            const innings2 = showBothInnings ? gameState.wormData.innings2 : [];
+
+            // Calculate max values
+            const allData = [...innings1, ...innings2];
+            const maxBalls = Math.max(
+                innings1.length,
+                innings2.length,
+                gameState.totalBalls
+            );
+            const maxRuns = Math.max(
+                ...allData.map(d => d.runs),
+                10
+            );
+
+            const runStep = Math.ceil(maxRuns / 5);
+
+            // Function to draw grid and axis labels
+            function drawGrid() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 1;
+
+                // Horizontal grid lines
+                for (let i = 0; i <= 5; i++) {
+                    const y = padding.top + chartHeight - (i * chartHeight / 5);
+                    ctx.beginPath();
+                    ctx.moveTo(padding.left, y);
+                    ctx.lineTo(padding.left + chartWidth, y);
+                    ctx.stroke();
+
+                    // Y-axis labels
+                    ctx.fillStyle = '#666';
+                    ctx.font = '11px Fredoka';
+                    ctx.textAlign = 'right';
+                    ctx.fillText(Math.round(i * runStep), padding.left - 8, y + 4);
+                }
+
+                // X-axis labels (balls/overs)
+                ctx.textAlign = 'center';
+                const ballStep = Math.ceil(maxBalls / 6);
+                for (let i = 0; i <= maxBalls; i += ballStep) {
+                    const x = padding.left + (i / maxBalls) * chartWidth;
+                    ctx.fillText(i, x, canvas.height - 8);
+                }
+
+                // Axis labels
+                ctx.fillStyle = '#888';
+                ctx.font = '11px Fredoka';
+                ctx.textAlign = 'center';
+                ctx.fillText('Balls', padding.left + chartWidth / 2, canvas.height - 2);
+
+                ctx.save();
+                ctx.translate(12, padding.top + chartHeight / 2);
+                ctx.rotate(-Math.PI / 2);
+                ctx.fillText('Runs', 0, 0);
+                ctx.restore();
+            }
+
+            // Function to draw marker at a point
+            function drawMarker(point, x, y) {
+                if (point.wicket) {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 10, 0, Math.PI * 2);
+                    ctx.fillStyle = '#dc3545';
+                    ctx.fill();
+                    ctx.strokeStyle = '#a02020';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 10px Fredoka';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('W', x, y + 4);
+                } else if (point.six) {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 10, 0, Math.PI * 2);
+                    ctx.fillStyle = '#28a745';
+                    ctx.fill();
+                    ctx.strokeStyle = '#1e7e34';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 10px Fredoka';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('6', x, y + 4);
+                }
+            }
+
+            // Function to get point coordinates
+            function getPointCoords(point) {
+                const x = padding.left + (point.ball / maxBalls) * chartWidth;
+                const y = padding.top + chartHeight - (point.runs / (runStep * 5)) * chartHeight;
+                return { x, y };
+            }
+
+            // Animation duration per innings (ms)
+            const animationDuration = 2000;
+
+            // Animate a single innings line
+            function animateInnings(data, color, onComplete) {
+                if (data.length === 0) {
+                    if (onComplete) onComplete();
+                    return;
+                }
+
+                const startTime = performance.now();
+                const totalPoints = data.length;
+
+                function animate(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / animationDuration, 1);
+
+                    // Calculate how many points to draw (linear progress)
+                    const pointsToDraw = Math.floor(progress * totalPoints);
+                    const partialProgress = (progress * totalPoints) - pointsToDraw;
+
+                    // Redraw grid (clears canvas)
+                    drawGrid();
+
+                    // Draw the line up to current progress
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 3;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+
+                    ctx.beginPath();
+                    ctx.moveTo(padding.left, padding.top + chartHeight);
+
+                    // Draw complete segments
+                    for (let i = 0; i < pointsToDraw && i < data.length; i++) {
+                        const coords = getPointCoords(data[i]);
+                        ctx.lineTo(coords.x, coords.y);
+                    }
+
+                    // Draw partial segment to next point
+                    if (pointsToDraw < data.length && partialProgress > 0) {
+                        const prevCoords = pointsToDraw > 0
+                            ? getPointCoords(data[pointsToDraw - 1])
+                            : { x: padding.left, y: padding.top + chartHeight };
+                        const nextCoords = getPointCoords(data[pointsToDraw]);
+
+                        const partialX = prevCoords.x + (nextCoords.x - prevCoords.x) * partialProgress;
+                        const partialY = prevCoords.y + (nextCoords.y - prevCoords.y) * partialProgress;
+                        ctx.lineTo(partialX, partialY);
+                    }
+
+                    ctx.stroke();
+
+                    // Draw markers for completed points
+                    for (let i = 0; i < pointsToDraw && i < data.length; i++) {
+                        const coords = getPointCoords(data[i]);
+                        drawMarker(data[i], coords.x, coords.y);
+                    }
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        // Draw final marker for last point
+                        if (data.length > 0) {
+                            const lastCoords = getPointCoords(data[data.length - 1]);
+                            drawMarker(data[data.length - 1], lastCoords.x, lastCoords.y);
+                        }
+                        if (onComplete) onComplete();
+                    }
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            // Start animation
+            drawGrid();
+            animateInnings(innings1, '#00B4D8', () => {
+                if (showBothInnings && innings2.length > 0) {
+                    // For second innings, we need to redraw first innings as static
+                    const drawStaticInnings = (data, color) => {
+                        ctx.strokeStyle = color;
+                        ctx.lineWidth = 3;
+                        ctx.lineCap = 'round';
+                        ctx.lineJoin = 'round';
+                        ctx.beginPath();
+                        ctx.moveTo(padding.left, padding.top + chartHeight);
+                        data.forEach(point => {
+                            const coords = getPointCoords(point);
+                            ctx.lineTo(coords.x, coords.y);
+                        });
+                        ctx.stroke();
+                        data.forEach(point => {
+                            const coords = getPointCoords(point);
+                            drawMarker(point, coords.x, coords.y);
+                        });
+                    };
+
+                    // Animate second innings while keeping first static
+                    const startTime2 = performance.now();
+                    const totalPoints2 = innings2.length;
+
+                    function animate2(currentTime) {
+                        const elapsed = currentTime - startTime2;
+                        const progress = Math.min(elapsed / animationDuration, 1);
+                        const pointsToDraw = Math.floor(progress * totalPoints2);
+                        const partialProgress = (progress * totalPoints2) - pointsToDraw;
+
+                        drawGrid();
+                        drawStaticInnings(innings1, '#00B4D8');
+
+                        // Draw second innings progress
+                        ctx.strokeStyle = '#FF6B35';
+                        ctx.lineWidth = 3;
+                        ctx.lineCap = 'round';
+                        ctx.lineJoin = 'round';
+                        ctx.beginPath();
+                        ctx.moveTo(padding.left, padding.top + chartHeight);
+
+                        for (let i = 0; i < pointsToDraw && i < innings2.length; i++) {
+                            const coords = getPointCoords(innings2[i]);
+                            ctx.lineTo(coords.x, coords.y);
+                        }
+
+                        if (pointsToDraw < innings2.length && partialProgress > 0) {
+                            const prevCoords = pointsToDraw > 0
+                                ? getPointCoords(innings2[pointsToDraw - 1])
+                                : { x: padding.left, y: padding.top + chartHeight };
+                            const nextCoords = getPointCoords(innings2[pointsToDraw]);
+                            const partialX = prevCoords.x + (nextCoords.x - prevCoords.x) * partialProgress;
+                            const partialY = prevCoords.y + (nextCoords.y - prevCoords.y) * partialProgress;
+                            ctx.lineTo(partialX, partialY);
+                        }
+
+                        ctx.stroke();
+
+                        for (let i = 0; i < pointsToDraw && i < innings2.length; i++) {
+                            const coords = getPointCoords(innings2[i]);
+                            drawMarker(innings2[i], coords.x, coords.y);
+                        }
+
+                        if (progress < 1) {
+                            requestAnimationFrame(animate2);
+                        } else if (innings2.length > 0) {
+                            const lastCoords = getPointCoords(innings2[innings2.length - 1]);
+                            drawMarker(innings2[innings2.length - 1], lastCoords.x, lastCoords.y);
+                        }
+                    }
+
+                    requestAnimationFrame(animate2);
+                }
+            });
+        }
+
+        // Commentary for match results
+        const WIN_COMMENTARY = [
+            "A dominant performance from {winner}!",
+            "{loser} were completely outplayed today.",
+            "What a match! {winner} showed their class.",
+            "{winner} made it look easy in the end.",
+            "The {loser} bowling just couldn't contain {winner}.",
+            "{winner} march on to victory!",
+            "Clinical stuff from {winner}."
+        ];
+
+        const LOSE_COMMENTARY = [
+            "{winner} were simply too good today.",
+            "A tough day at the office for {loser}.",
+            "{loser} will want to forget this one quickly.",
+            "{winner} proved why they're the favorites.",
+            "Not enough runs on the board for {loser}.",
+            "{winner} cruise to victory.",
+            "Back to the drawing board for {loser}."
+        ];
+
+        const TIE_COMMENTARY = [
+            "What a finish! Neither side could be separated.",
+            "Cricket doesn't get much closer than this!",
+            "Both teams gave everything - a fair result.",
+            "An incredible match ends in a tie!",
+            "Two evenly matched sides today."
+        ];
+
+        function showSummary() {
+            gameState.phase = 'summary';
+
+            const playerTeam = TEAMS[gameState.playerTeam];
+            const opponentTeam = TEAMS[gameState.opponentTeam];
+            const playerScore = gameState.firstInningsScore.runs;
+            const computerScore = gameState.secondInningsScore.runs;
+
+            document.getElementById('firstInningsTitle').textContent = `${playerTeam.name} Batting`;
+            document.getElementById('firstInningsScore').textContent = `${gameState.firstInningsScore.runs} runs`;
+            document.getElementById('firstInningsWickets').textContent = `${gameState.firstInningsScore.wickets} wickets lost`;
+
+            document.getElementById('secondInningsTitle').textContent = `${opponentTeam.name} Batting`;
+            document.getElementById('secondInningsScore').textContent = `${gameState.secondInningsScore.runs} runs`;
+            document.getElementById('secondInningsWickets').textContent = `${gameState.secondInningsScore.wickets} wickets taken`;
+
+            const resultDiv = document.getElementById('summaryResult');
+            const commentaryDiv = document.getElementById('summaryCommentary');
+
+            if (playerScore > computerScore) {
+                const margin = playerScore - computerScore;
+                resultDiv.className = 'summary-result win';
+                resultDiv.textContent = `${playerTeam.name} Win by ${margin} runs!`;
+                const commentary = WIN_COMMENTARY[Math.floor(Math.random() * WIN_COMMENTARY.length)]
+                    .replace('{winner}', playerTeam.name)
+                    .replace('{loser}', opponentTeam.name);
+                commentaryDiv.textContent = `"${commentary}"`;
+            } else if (computerScore > playerScore) {
+                const margin = computerScore - playerScore;
+                resultDiv.className = 'summary-result lose';
+                resultDiv.textContent = `${opponentTeam.name} Win by ${margin} runs`;
+                const commentary = LOSE_COMMENTARY[Math.floor(Math.random() * LOSE_COMMENTARY.length)]
+                    .replace('{winner}', opponentTeam.name)
+                    .replace('{loser}', playerTeam.name);
+                commentaryDiv.textContent = `"${commentary}"`;
+            } else {
+                resultDiv.className = 'summary-result tie';
+                resultDiv.textContent = `It's a Tie!`;
+                const commentary = TIE_COMMENTARY[Math.floor(Math.random() * TIE_COMMENTARY.length)];
+                commentaryDiv.textContent = `"${commentary}"`;
+            }
+
+            document.getElementById('scorebug').classList.add('hidden');
+            showScreen('summaryScreen');
+        }
+
+        function restartGame() {
+            gameState = {
+                playerTeam: null,
+                opponentTeam: null,
+                difficulty: null,
+                overs: 3,
+                totalBalls: 18,
+                currentInnings: 1,
+                playerBatting: true,
+                ballCount: 0,
+                runs: 0,
+                wickets: 0,
+                currentOver: 0,
+                ballsInOver: 0,
+                ballHistory: [],
+                wormData: { innings1: [], innings2: [] },
+                firstInningsScore: { runs: 0, wickets: 0 },
+                secondInningsScore: { runs: 0, wickets: 0 },
+                phase: 'welcome',
+                currentQuestion: null,
+                playerAnswer: null,
+                computerAnswer: null,
+                playerNumber: null,
+                computerNumber: null,
+                availableNumbers: [...SCORING_OPTIONS],
+                isNoBall: false,
+                usedQuestions: [],
+                isProcessing: false,
+                lastPlayerCorrect: false,
+                lastComputerCorrect: false
+            };
+
+            document.body.classList.remove('gameplay');
+            document.getElementById('welcomeHeader').classList.remove('hidden');
+            document.getElementById('scorebug').classList.add('hidden');
+            document.getElementById('oversSlider').value = 3;
+            updateOversDisplay();
+
+            showScreen('welcomeScreen');
+        }
+
+        // Explainer modal functions
+        function showExplainer(event) {
+            event.stopPropagation();
+            document.getElementById('explainerModal').classList.add('show');
+        }
+
+        function closeExplainer(event) {
+            if (event && event.target !== document.getElementById('explainerModal')) return;
+            document.getElementById('explainerModal').classList.remove('show');
+        }
+    </script>
 </body>
 </html>
