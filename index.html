@@ -685,16 +685,84 @@
             color: #aaa;
             text-transform: none;
             letter-spacing: 0;
-            display: flex;
-            align-items: center;
-            gap: 4px;
+            display: none; /* Hidden on desktop, shown on mobile */
         }
 
-        .coming-soon-label .info-icon {
-            width: 14px;
-            height: 14px;
-            font-size: 0.6rem;
-            line-height: 14px;
+        .country-btn.coming-soon {
+            position: relative;
+        }
+
+        .country-btn.coming-soon .country-flag,
+        .country-btn.coming-soon .country-name {
+            display: none;
+        }
+
+        .country-btn.coming-soon .coming-soon-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .coming-soon-icon .info-icon {
+            width: 32px;
+            height: 32px;
+            font-size: 1.2rem;
+            line-height: 32px;
+        }
+
+        .coming-soon-icon .icon-label {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 0.7rem;
+            color: #888;
+            text-transform: none;
+        }
+
+        /* Tooltip for coming soon */
+        .coming-soon-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--crt-black);
+            color: var(--cream);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 100;
+            margin-bottom: 8px;
+        }
+
+        .coming-soon-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--crt-black);
+        }
+
+        .country-btn.coming-soon:hover .coming-soon-tooltip,
+        .country-btn.coming-soon.show-tooltip .coming-soon-tooltip {
+            opacity: 1;
+        }
+
+        /* On larger screens, show full country info for coming soon */
+        @media (min-width: 601px) {
+            .country-btn.coming-soon .country-flag,
+            .country-btn.coming-soon .country-name {
+                display: block;
+                opacity: 0.5;
+            }
+            .country-btn.coming-soon .coming-soon-icon {
+                display: none;
+            }
         }
 
         /* ========== DURATION SCREEN ========== */
@@ -1285,6 +1353,45 @@
             text-shadow: 3px 3px 0 var(--warm-brown);
         }
 
+        .summary-result {
+            font-family: 'Anton', sans-serif;
+            font-size: 1.5rem;
+            text-align: center;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border: 4px solid var(--bh-gold);
+            background: linear-gradient(180deg, #2a2a2a, #1a1a1a);
+        }
+
+        .summary-result.win {
+            color: var(--success-green);
+            border-color: var(--success-green);
+        }
+
+        .summary-result.lose {
+            color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .summary-result.tie {
+            color: var(--bh-gold);
+            border-color: var(--bh-gold);
+        }
+
+        .summary-commentary {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1rem;
+            text-align: center;
+            color: var(--cream);
+            padding: 15px 20px;
+            margin: 20px 0;
+            background: linear-gradient(180deg, var(--pakistan-green), var(--pakistan-green-dark));
+            border: 3px solid var(--bh-gold);
+            font-style: italic;
+        }
+
         .innings-summary {
             background: linear-gradient(180deg, #333, #222);
             border: 4px solid var(--electric-teal);
@@ -1469,24 +1576,155 @@
         }
 
         .worm-team-badge {
-            width: 40px;
-            height: 30px;
-            background: var(--pakistan-green);
-            border: 2px solid var(--crt-black);
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: rgba(0,0,0,0.5);
+            border: 2px solid var(--crt-black);
             font-family: 'Anton', sans-serif;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .worm-team-badge.batting {
-            background: var(--electric-teal);
+            border-color: var(--electric-teal);
         }
 
         .worm-team-badge.bowling {
-            background: var(--racing-orange);
+            border-color: var(--racing-orange);
+        }
+
+        /* CSS Flags - 1992 broadcast style */
+        .css-flag {
+            width: 24px;
+            height: 16px;
+            border: 1px solid var(--crt-black);
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        /* England - St George's Cross */
+        .flag-eng {
+            background: white;
+        }
+        .flag-eng::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #c8102e;
+            transform: translateY(-50%);
+        }
+        .flag-eng::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #c8102e;
+            transform: translateX(-50%);
+        }
+
+        /* Australia - Blue with stars hint */
+        .flag-aus {
+            background: linear-gradient(180deg, #00008B 100%, #00008B 100%);
+        }
+        .flag-aus::before {
+            content: '★';
+            position: absolute;
+            bottom: 2px;
+            left: 3px;
+            font-size: 8px;
+            color: white;
+        }
+        .flag-aus::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 12px;
+            height: 8px;
+            background: linear-gradient(180deg, #00247d 33%, white 33%, white 40%, #cf142b 40%, #cf142b 60%, white 60%, white 67%, #00247d 67%);
+        }
+
+        /* India - Tricolor */
+        .flag-ind {
+            background: linear-gradient(180deg, #ff9933 33%, white 33%, white 67%, #138808 67%);
+        }
+        .flag-ind::after {
+            content: '●';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 6px;
+            color: #000080;
+        }
+
+        /* Pakistan - Green with white and crescent hint */
+        .flag-pak {
+            background: linear-gradient(90deg, white 25%, #01411c 25%);
+        }
+        .flag-pak::after {
+            content: '☪';
+            position: absolute;
+            top: 50%;
+            right: 4px;
+            transform: translateY(-50%);
+            font-size: 8px;
+            color: white;
+        }
+
+        /* New Zealand - Blue with stars */
+        .flag-nzl {
+            background: #00247d;
+        }
+        .flag-nzl::before {
+            content: '✦✦';
+            position: absolute;
+            right: 2px;
+            top: 2px;
+            font-size: 5px;
+            color: #cc142b;
+        }
+
+        /* South Africa - Multi-color Y */
+        .flag-rsa {
+            background: linear-gradient(180deg, #e03c31 33%, white 33%, white 37%, #007749 37%, #007749 63%, white 63%, white 67%, #001489 67%);
+        }
+
+        /* West Indies - Maroon with palm */
+        .flag-wi {
+            background: #7b1113;
+        }
+        .flag-wi::after {
+            content: '🌴';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 10px;
+        }
+
+        /* Sri Lanka - Maroon/gold */
+        .flag-slk {
+            background: linear-gradient(90deg, #00533f 15%, #ffb700 15%, #ffb700 30%, #8d153a 30%);
+        }
+
+        /* Zimbabwe - Stripes */
+        .flag-zim {
+            background: linear-gradient(180deg,
+                #006400 14%, #ffd200 14%, #ffd200 28%,
+                #d40000 28%, #d40000 42%, #000 42%,
+                #000 58%, #d40000 58%, #d40000 72%,
+                #ffd200 72%, #ffd200 86%, #006400 86%);
         }
 
         .worm-chart-container {
@@ -1919,7 +2157,7 @@
 
             <!-- Summary Screen -->
             <div class="game-panel welcome hidden" id="summaryScreen">
-                <div class="summary-title">Match Complete!</div>
+                <div class="summary-result" id="summaryResult">England Win by 14 runs!</div>
 
                 <div class="innings-summary">
                     <h3 id="firstInningsTitle">First Innings</h3>
@@ -1933,7 +2171,7 @@
                     <div class="innings-wickets" id="secondInningsWickets">0 wickets</div>
                 </div>
 
-                <div class="winner-message" id="winnerMessage"></div>
+                <div class="summary-commentary" id="summaryCommentary">The Australians just weren't good enough today.</div>
 
                 <button class="restart-btn" onclick="restartGame()">Play Again</button>
             </div>
@@ -1954,15 +2192,15 @@
 
         // 1992 World Cup Teams
         const TEAMS = {
-            england: { name: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', opponent: 'australia', available: true },
-            australia: { name: 'Australia', flag: '🇦🇺', opponent: 'england', available: true },
-            india: { name: 'India', flag: '🇮🇳', opponent: 'pakistan', available: true },
-            pakistan: { name: 'Pakistan', flag: '🇵🇰', opponent: 'india', available: true },
-            newzealand: { name: 'New Zealand', flag: '🇳🇿', opponent: 'southafrica', available: false },
-            southafrica: { name: 'South Africa', flag: '🇿🇦', opponent: 'newzealand', available: false },
-            westindies: { name: 'West Indies', flag: '🌴', opponent: 'srilanka', available: false },
-            srilanka: { name: 'Sri Lanka', flag: '🇱🇰', opponent: 'westindies', available: false },
-            zimbabwe: { name: 'Zimbabwe', flag: '🇿🇼', opponent: 'kenya', available: false }
+            england: { name: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', flagClass: 'flag-eng', opponent: 'australia', available: true },
+            australia: { name: 'Australia', flag: '🇦🇺', flagClass: 'flag-aus', opponent: 'england', available: true },
+            india: { name: 'India', flag: '🇮🇳', flagClass: 'flag-ind', opponent: 'pakistan', available: true },
+            pakistan: { name: 'Pakistan', flag: '🇵🇰', flagClass: 'flag-pak', opponent: 'india', available: true },
+            newzealand: { name: 'New Zealand', flag: '🇳🇿', flagClass: 'flag-nzl', opponent: 'southafrica', available: false },
+            southafrica: { name: 'South Africa', flag: '🇿🇦', flagClass: 'flag-rsa', opponent: 'newzealand', available: false },
+            westindies: { name: 'West Indies', flag: '🌴', flagClass: 'flag-wi', opponent: 'srilanka', available: false },
+            srilanka: { name: 'Sri Lanka', flag: '🇱🇰', flagClass: 'flag-slk', opponent: 'westindies', available: false },
+            zimbabwe: { name: 'Zimbabwe', flag: '🇿🇼', flagClass: 'flag-zim', opponent: 'kenya', available: false }
         };
 
         // AI Strategies
@@ -2235,20 +2473,29 @@
                     btn.onclick = () => selectCountry(key);
                 } else {
                     btn.disabled = true;
+                    btn.className = 'country-btn coming-soon';
                     btn.innerHTML = `
                         <span class="country-flag">${team.flag}</span>
                         <span class="country-name">${team.name}</span>
-                        <span class="coming-soon-label">Coming soon <span class="info-icon" onclick="showComingSoonInfo(event)">?</span></span>
+                        <div class="coming-soon-icon">
+                            <span class="info-icon">?</span>
+                            <span class="icon-label">Soon</span>
+                        </div>
+                        <div class="coming-soon-tooltip">${team.name} - Coming Soon!</div>
                     `;
+                    btn.onclick = (e) => toggleComingSoonTooltip(e, btn);
                 }
 
                 grid.appendChild(btn);
             });
         }
 
-        function showComingSoonInfo(event) {
-            event.stopPropagation();
-            // Could show a modal here, for now just prevent click
+        function toggleComingSoonTooltip(event, btn) {
+            event.preventDefault();
+            // Toggle tooltip on mobile
+            btn.classList.toggle('show-tooltip');
+            // Hide after 2 seconds
+            setTimeout(() => btn.classList.remove('show-tooltip'), 2000);
         }
 
         // Navigation Functions
@@ -2759,11 +3006,11 @@
             const title = document.getElementById('wormTitle');
             title.textContent = isMatchComplete ? 'Match Summary' : '1st Innings';
 
-            // Update badges with team names
+            // Update badges with team names and CSS flags
             const playerTeam = TEAMS[gameState.playerTeam];
             const opponentTeam = TEAMS[gameState.opponentTeam];
-            document.getElementById('wormBatBadge').textContent = `${playerTeam.flag} ${playerTeam.name}`;
-            document.getElementById('wormBowlBadge').textContent = `${opponentTeam.name} ${opponentTeam.flag}`;
+            document.getElementById('wormBatBadge').innerHTML = `<div class="css-flag ${playerTeam.flagClass}"></div>${playerTeam.name}`;
+            document.getElementById('wormBowlBadge').innerHTML = `${opponentTeam.name}<div class="css-flag ${opponentTeam.flagClass}"></div>`;
 
             // Update legend for match complete (show both innings)
             const legend = document.getElementById('wormLegend');
@@ -2771,11 +3018,11 @@
                 legend.innerHTML = `
                     <div class="legend-item">
                         <div class="legend-line innings1"></div>
-                        <span>${playerTeam.flag} ${playerTeam.name}</span>
+                        <span><div class="css-flag ${playerTeam.flagClass}" style="display:inline-block;vertical-align:middle;margin-right:4px;"></div>${playerTeam.name}</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-line innings2"></div>
-                        <span>${opponentTeam.flag} ${opponentTeam.name}</span>
+                        <span><div class="css-flag ${opponentTeam.flagClass}" style="display:inline-block;vertical-align:middle;margin-right:4px;"></div>${opponentTeam.name}</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-dot six"></div>
@@ -2790,7 +3037,7 @@
                 legend.innerHTML = `
                     <div class="legend-item">
                         <div class="legend-line innings1"></div>
-                        <span>${playerTeam.flag} ${playerTeam.name}</span>
+                        <span><div class="css-flag ${playerTeam.flagClass}" style="display:inline-block;vertical-align:middle;margin-right:4px;"></div>${playerTeam.name}</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-dot six"></div>
@@ -2808,18 +3055,18 @@
             if (isMatchComplete) {
                 summary.innerHTML = `
                     <div class="worm-innings-score">
-                        <div class="worm-innings-label">${playerTeam.flag} ${playerTeam.name}</div>
+                        <div class="worm-innings-label"><div class="css-flag ${playerTeam.flagClass}" style="display:inline-block;vertical-align:middle;margin-right:6px;"></div>${playerTeam.name}</div>
                         <div class="worm-innings-runs batting">${gameState.firstInningsScore.runs}</div>
                     </div>
                     <div class="worm-innings-score">
-                        <div class="worm-innings-label">${opponentTeam.flag} ${opponentTeam.name}</div>
+                        <div class="worm-innings-label"><div class="css-flag ${opponentTeam.flagClass}" style="display:inline-block;vertical-align:middle;margin-right:6px;"></div>${opponentTeam.name}</div>
                         <div class="worm-innings-runs bowling">${gameState.secondInningsScore.runs}</div>
                     </div>
                 `;
             } else {
                 summary.innerHTML = `
                     <div class="worm-innings-score">
-                        <div class="worm-innings-label">${playerTeam.flag} ${playerTeam.name}</div>
+                        <div class="worm-innings-label"><div class="css-flag ${playerTeam.flagClass}" style="display:inline-block;vertical-align:middle;margin-right:6px;"></div>${playerTeam.name}</div>
                         <div class="worm-innings-runs batting">${gameState.firstInningsScore.runs}</div>
                     </div>
                 `;
@@ -3125,6 +3372,35 @@
             });
         }
 
+        // Commentary for match results
+        const WIN_COMMENTARY = [
+            "A dominant performance from {winner}!",
+            "{loser} were completely outplayed today.",
+            "What a match! {winner} showed their class.",
+            "{winner} made it look easy in the end.",
+            "The {loser} bowling just couldn't contain {winner}.",
+            "{winner} march on to victory!",
+            "Clinical stuff from {winner}."
+        ];
+
+        const LOSE_COMMENTARY = [
+            "{winner} were simply too good today.",
+            "A tough day at the office for {loser}.",
+            "{loser} will want to forget this one quickly.",
+            "{winner} proved why they're the favorites.",
+            "Not enough runs on the board for {loser}.",
+            "{winner} cruise to victory.",
+            "Back to the drawing board for {loser}."
+        ];
+
+        const TIE_COMMENTARY = [
+            "What a finish! Neither side could be separated.",
+            "Cricket doesn't get much closer than this!",
+            "Both teams gave everything - a fair result.",
+            "An incredible match ends in a tie!",
+            "Two evenly matched sides today."
+        ];
+
         function showSummary() {
             gameState.phase = 'summary';
 
@@ -3133,27 +3409,38 @@
             const playerScore = gameState.firstInningsScore.runs;
             const computerScore = gameState.secondInningsScore.runs;
 
-            document.getElementById('firstInningsTitle').textContent = `${playerTeam.flag} ${playerTeam.name} Batting`;
+            document.getElementById('firstInningsTitle').textContent = `${playerTeam.name} Batting`;
             document.getElementById('firstInningsScore').textContent = `${gameState.firstInningsScore.runs} runs`;
             document.getElementById('firstInningsWickets').textContent = `${gameState.firstInningsScore.wickets} wickets lost`;
 
-            document.getElementById('secondInningsTitle').textContent = `${opponentTeam.flag} ${opponentTeam.name} Batting`;
+            document.getElementById('secondInningsTitle').textContent = `${opponentTeam.name} Batting`;
             document.getElementById('secondInningsScore').textContent = `${gameState.secondInningsScore.runs} runs`;
             document.getElementById('secondInningsWickets').textContent = `${gameState.secondInningsScore.wickets} wickets taken`;
 
-            const winnerDiv = document.getElementById('winnerMessage');
+            const resultDiv = document.getElementById('summaryResult');
+            const commentaryDiv = document.getElementById('summaryCommentary');
 
             if (playerScore > computerScore) {
                 const margin = playerScore - computerScore;
-                winnerDiv.className = 'winner-message win';
-                winnerDiv.innerHTML = `${playerTeam.flag} ${playerTeam.name} Win by ${margin} runs!<small>vs ${opponentTeam.name}</small>`;
+                resultDiv.className = 'summary-result win';
+                resultDiv.textContent = `${playerTeam.name} Win by ${margin} runs!`;
+                const commentary = WIN_COMMENTARY[Math.floor(Math.random() * WIN_COMMENTARY.length)]
+                    .replace('{winner}', playerTeam.name)
+                    .replace('{loser}', opponentTeam.name);
+                commentaryDiv.textContent = `"${commentary}"`;
             } else if (computerScore > playerScore) {
                 const margin = computerScore - playerScore;
-                winnerDiv.className = 'winner-message lose';
-                winnerDiv.innerHTML = `${opponentTeam.flag} ${opponentTeam.name} Win by ${margin} runs<small>vs ${playerTeam.name}</small>`;
+                resultDiv.className = 'summary-result lose';
+                resultDiv.textContent = `${opponentTeam.name} Win by ${margin} runs`;
+                const commentary = LOSE_COMMENTARY[Math.floor(Math.random() * LOSE_COMMENTARY.length)]
+                    .replace('{winner}', opponentTeam.name)
+                    .replace('{loser}', playerTeam.name);
+                commentaryDiv.textContent = `"${commentary}"`;
             } else {
-                winnerDiv.className = 'winner-message tie';
-                winnerDiv.innerHTML = `It's a Tie!<small>${playerTeam.name} vs ${opponentTeam.name}</small>`;
+                resultDiv.className = 'summary-result tie';
+                resultDiv.textContent = `It's a Tie!`;
+                const commentary = TIE_COMMENTARY[Math.floor(Math.random() * TIE_COMMENTARY.length)];
+                commentaryDiv.textContent = `"${commentary}"`;
             }
 
             document.getElementById('scorebug').classList.add('hidden');
