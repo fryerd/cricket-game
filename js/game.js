@@ -96,12 +96,12 @@ function initDOMReferences() {
 
     // Question screen
     DOM.questionText = document.getElementById('questionText');
-    DOM.optionsContainer = document.getElementById('optionsContainer');
+    DOM.optionsContainer = document.getElementById('questionOptions');
     DOM.submitBtn = document.getElementById('submitBtn');
 
     // Delivery screen
     DOM.deliveryStatus = document.getElementById('deliveryStatus');
-    DOM.numberGrid = document.getElementById('numberGrid');
+    DOM.numberGrid = document.getElementById('numberOptions');
 
     // Result screen
     DOM.batsmanCircle = document.getElementById('batsmanCircle');
@@ -1303,3 +1303,8 @@ function closeExplainer(event) {
 
 // Initialize DOM references when page loads
 document.addEventListener('DOMContentLoaded', initDOMReferences);
+
+// Function alias for HTML onclick compatibility
+function goToCountrySelect() {
+    startGame();
+}
