@@ -523,6 +523,15 @@
             box-shadow: 2px 2px 0 var(--crt-black);
         }
 
+        .time-estimate {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 0.85rem;
+            color: var(--cream);
+            opacity: 0.7;
+            margin-top: 8px;
+            text-align: center;
+        }
+
         .difficulty-grid {
             display: flex;
             flex-direction: column;
@@ -694,28 +703,19 @@
 
         .country-btn.coming-soon .country-flag,
         .country-btn.coming-soon .country-name {
-            display: none;
+            opacity: 0.4;
         }
 
-        .country-btn.coming-soon .coming-soon-icon {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .coming-soon-icon .info-icon {
-            width: 32px;
-            height: 32px;
-            font-size: 1.2rem;
-            line-height: 32px;
-        }
-
-        .coming-soon-icon .icon-label {
+        .coming-soon-badge {
             font-family: 'Fredoka', sans-serif;
-            font-size: 0.7rem;
-            color: #888;
+            font-size: 0.55rem;
+            color: #aaa;
             text-transform: none;
+            letter-spacing: 0;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-top: 3px;
         }
 
         /* Tooltip for coming soon */
@@ -751,18 +751,6 @@
         .country-btn.coming-soon:hover .coming-soon-tooltip,
         .country-btn.coming-soon.show-tooltip .coming-soon-tooltip {
             opacity: 1;
-        }
-
-        /* On larger screens, show full country info for coming soon */
-        @media (min-width: 601px) {
-            .country-btn.coming-soon .country-flag,
-            .country-btn.coming-soon .country-name {
-                display: block;
-                opacity: 0.5;
-            }
-            .country-btn.coming-soon .coming-soon-icon {
-                display: none;
-            }
         }
 
         /* ========== DURATION SCREEN ========== */
@@ -2051,16 +2039,16 @@
 
             <!-- Duration Selection -->
             <div class="game-panel welcome hidden" id="durationScreen">
-                <div class="section-title">Match Duration</div>
                 <div class="duration-content">
                     <div class="match-preview">
                         <div class="match-preview-teams" id="matchPreviewTeams"></div>
                         <div class="match-preview-difficulty" id="matchPreviewDifficulty"></div>
                     </div>
                     <div class="overs-control">
-                        <div class="overs-label">Overs</div>
+                        <div class="overs-label">Match Duration</div>
                         <div class="overs-display" id="oversValue">3 Overs</div>
                         <input type="range" min="1" max="5" value="3" class="overs-slider" id="oversSlider" oninput="updateOversDisplay()">
+                        <div class="time-estimate" id="timeEstimate">Approx. 7-8 minutes</div>
                     </div>
                     <button class="start-match-btn" onclick="startMatch()">Start Match</button>
                 </div>
@@ -2346,6 +2334,57 @@
             return Math.random() < COMPUTER_CORRECT_RATE;
         }
 
+        // Cricket jargon commentary with variations
+        function getRunsCommentary(runs, battingTeam, bowlingTeam) {
+            const commentaries = {
+                0: [
+                    `Dot ball! Well bowled by ${bowlingTeam}.`,
+                    `Nothing doing there. Tight bowling.`,
+                    `Defended solidly. No run.`,
+                    `${bowlingTeam} keep it tight. Dot ball.`,
+                    `Good length, well left. No run.`
+                ],
+                1: [
+                    `Quick single taken by ${battingTeam}.`,
+                    `Nudged away for one. Smart cricket.`,
+                    `${battingTeam} rotate the strike. One run.`,
+                    `Pushed into the gap. They take a single.`,
+                    `Dab and run. Good running between the wickets.`
+                ],
+                2: [
+                    `${battingTeam} ran hard for two!`,
+                    `Worked away nicely. Two runs.`,
+                    `Placed into the gap. They come back for the second.`,
+                    `Good running! Two to ${battingTeam}.`,
+                    `Punched through the covers for a brace.`
+                ],
+                3: [
+                    `Pushing for three! ${battingTeam} want every run.`,
+                    `Three runs! Great hustle between the wickets.`,
+                    `Into the deep and they're back for three.`,
+                    `${battingTeam} turn two into three. Excellent running!`,
+                    `Driven to the boundary... but cut off! Three runs.`
+                ],
+                4: [
+                    `FOUR! Cracking shot by ${battingTeam}!`,
+                    `That's racing away to the boundary! Four runs.`,
+                    `FOUR! Timed to perfection.`,
+                    `Pierced the field beautifully. FOUR!`,
+                    `Sweetly struck! Four runs to ${battingTeam}.`
+                ],
+                6: [
+                    `SIX! That's a maximum! ${battingTeam} launch it!`,
+                    `HUGE! That's gone all the way! Six runs.`,
+                    `Into the stands! Maximum from ${battingTeam}!`,
+                    `SIX! Cleared the rope with ease!`,
+                    `That's massive! Six runs. The crowd goes wild!`
+                ]
+            };
+
+            const options = commentaries[runs] || [`${runs} run${runs === 1 ? '' : 's'} to ${battingTeam}.`];
+            return options[Math.floor(Math.random() * options.length)];
+        }
+
         // UI Functions
         function showScreen(screenId) {
             ['welcomeScreen', 'countryScreen', 'difficultyScreen', 'durationScreen', 'questionScreen', 'deliveryScreen', 'resultScreen', 'inningsBreakScreen', 'summaryScreen']
@@ -2454,6 +2493,12 @@
             const overs = document.getElementById('oversSlider').value;
             const plural = overs == 1 ? 'Over' : 'Overs';
             document.getElementById('oversValue').textContent = `${overs} ${plural}`;
+
+            // Calculate time estimate (75 seconds per over, 2 innings)
+            const totalSeconds = overs * 75 * 2;
+            const minutes = Math.floor(totalSeconds / 60);
+            const maxMinutes = minutes + Math.ceil(minutes * 0.15); // Add 15% buffer
+            document.getElementById('timeEstimate').textContent = `Approx. ${minutes}-${maxMinutes} minutes`;
         }
 
         // Populate country grid on load
@@ -2477,11 +2522,8 @@
                     btn.innerHTML = `
                         <span class="country-flag">${team.flag}</span>
                         <span class="country-name">${team.name}</span>
-                        <div class="coming-soon-icon">
-                            <span class="info-icon">?</span>
-                            <span class="icon-label">Soon</span>
-                        </div>
-                        <div class="coming-soon-tooltip">${team.name} - Coming Soon!</div>
+                        <span class="coming-soon-badge">Coming Soon</span>
+                        <div class="coming-soon-tooltip">${team.name} coming in a future update!</div>
                     `;
                     btn.onclick = (e) => toggleComingSoonTooltip(e, btn);
                 }
@@ -2492,9 +2534,7 @@
 
         function toggleComingSoonTooltip(event, btn) {
             event.preventDefault();
-            // Toggle tooltip on mobile
             btn.classList.toggle('show-tooltip');
-            // Hide after 2 seconds
             setTimeout(() => btn.classList.remove('show-tooltip'), 2000);
         }
 
@@ -2514,14 +2554,17 @@
         function selectDifficulty(difficulty) {
             gameState.difficulty = difficulty;
 
-            // Update match preview
+            // Update match preview with CSS flags
             const playerTeam = TEAMS[gameState.playerTeam];
             const opponentTeam = TEAMS[gameState.opponentTeam];
-            document.getElementById('matchPreviewTeams').textContent =
-                `${playerTeam.flag} ${playerTeam.name} vs ${opponentTeam.name} ${opponentTeam.flag}`;
+            document.getElementById('matchPreviewTeams').innerHTML =
+                `<div class="css-flag ${playerTeam.flagClass}" style="display:inline-block;vertical-align:middle;margin-right:8px;"></div>${playerTeam.name} vs ${opponentTeam.name}<div class="css-flag ${opponentTeam.flagClass}" style="display:inline-block;vertical-align:middle;margin-left:8px;"></div>`;
 
             const difficultyNames = { easy: 'Easy', medium: 'Medium', hard: 'Hard', legendary: 'Legendary' };
             document.getElementById('matchPreviewDifficulty').textContent = `${difficultyNames[difficulty]} Difficulty`;
+
+            // Update time estimate for default slider value
+            updateOversDisplay();
 
             showScreen('durationScreen');
         }
@@ -2744,14 +2787,7 @@
                 } else {
                     runsScored = gameState.playerNumber;
                     gameState.runs += runsScored;
-                    const runWord = runsScored === 1 ? 'run' : 'runs';
-                    if (runsScored === 4) {
-                        commentary = `FOUR! ${runsScored} ${runWord} to ${battingTeam.name}`;
-                    } else if (runsScored === 6) {
-                        commentary = `SIX! Maximum! ${runsScored} ${runWord} for ${battingTeam.name}`;
-                    } else {
-                        commentary = `${runsScored} ${runWord} to ${battingTeam.name}`;
-                    }
+                    commentary = getRunsCommentary(runsScored, battingTeam.name, bowlingTeam.name);
                 }
             } else {
                 if (numbersMatch && !gameState.isNoBall) {
@@ -2764,8 +2800,7 @@
                 } else {
                     runsScored = gameState.computerNumber;
                     gameState.runs += runsScored;
-                    const runWord = runsScored === 1 ? 'run' : 'runs';
-                    commentary = `${runsScored} ${runWord} to ${battingTeam.name}`;
+                    commentary = getRunsCommentary(runsScored, battingTeam.name, bowlingTeam.name);
                 }
             }
 
@@ -3079,10 +3114,13 @@
 
             showScreen('inningsBreakScreen');
 
-            // Draw the worm chart after a short delay
-            setTimeout(() => {
-                drawWormChart(isMatchComplete);
-            }, 100);
+            // Draw the worm chart after layout is complete
+            // Use double requestAnimationFrame to ensure the browser has laid out the screen
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    drawWormChart(isMatchComplete);
+                });
+            });
         }
 
         function continueFromInningsBreak(isMatchComplete) {
@@ -3115,7 +3153,15 @@
 
             // Set canvas size
             const wrapper = canvas.parentElement;
-            canvas.width = wrapper.clientWidth - 30;
+            const wrapperWidth = wrapper.clientWidth;
+
+            // Safety check: if wrapper has no width yet, retry after a delay
+            if (wrapperWidth < 50) {
+                setTimeout(() => drawWormChart(showBothInnings), 50);
+                return;
+            }
+
+            canvas.width = wrapperWidth - 30;
             canvas.height = 250;
 
             const padding = { top: 20, right: 20, bottom: 30, left: 45 };
