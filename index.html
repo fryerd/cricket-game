@@ -579,6 +579,172 @@
             opacity: 0.9;
         }
 
+        .diff-legendary {
+            background: linear-gradient(180deg, #1a1a2e, #0f0f1a);
+            color: var(--bh-gold);
+            border: 4px solid var(--bh-gold);
+            box-shadow: 5px 5px 0 var(--warm-brown);
+        }
+        .diff-legendary:hover { box-shadow: 8px 8px 0 var(--warm-brown); }
+
+        /* ========== WELCOME SCREEN ========== */
+        .welcome-content {
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        .welcome-title {
+            font-family: 'Anton', sans-serif;
+            font-size: 2.5rem;
+            color: var(--bh-gold);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 0 var(--crt-black);
+        }
+
+        .welcome-subtitle {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.1rem;
+            color: var(--cream);
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        .play-btn {
+            font-family: 'Anton', sans-serif;
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            padding: 20px 50px;
+            background: linear-gradient(180deg, var(--pakistan-green), var(--pakistan-green-dark));
+            color: var(--cream);
+            border: 4px solid var(--bh-gold);
+            box-shadow: 6px 6px 0 var(--warm-brown);
+            cursor: pointer;
+            transition: all 0.1s ease;
+        }
+
+        .play-btn:hover {
+            transform: translate(-3px, -3px);
+            box-shadow: 9px 9px 0 var(--warm-brown);
+        }
+
+        /* ========== COUNTRY SELECTION ========== */
+        .country-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .country-btn {
+            font-family: 'Anton', sans-serif;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 15px 10px;
+            background: linear-gradient(180deg, var(--pakistan-green), var(--pakistan-green-dark));
+            color: var(--cream);
+            border: 3px solid var(--bh-gold);
+            box-shadow: 4px 4px 0 var(--warm-brown);
+            cursor: pointer;
+            transition: all 0.1s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .country-btn:hover:not(:disabled) {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 var(--warm-brown);
+        }
+
+        .country-btn:disabled {
+            background: linear-gradient(180deg, #444, #333);
+            color: #888;
+            border-color: #555;
+            box-shadow: 4px 4px 0 #222;
+            cursor: not-allowed;
+            filter: grayscale(0.5);
+            opacity: 0.7;
+        }
+
+        .country-flag {
+            font-size: 2rem;
+        }
+
+        .country-name {
+            font-size: 0.85rem;
+        }
+
+        .coming-soon-label {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 0.65rem;
+            color: #aaa;
+            text-transform: none;
+            letter-spacing: 0;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .coming-soon-label .info-icon {
+            width: 14px;
+            height: 14px;
+            font-size: 0.6rem;
+            line-height: 14px;
+        }
+
+        /* ========== DURATION SCREEN ========== */
+        .duration-content {
+            padding: 20px 0;
+        }
+
+        .start-match-btn {
+            font-family: 'Anton', sans-serif;
+            font-size: 1.4rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 18px 40px;
+            background: linear-gradient(180deg, var(--pakistan-green), var(--pakistan-green-dark));
+            color: var(--cream);
+            border: 4px solid var(--bh-gold);
+            box-shadow: 5px 5px 0 var(--warm-brown);
+            cursor: pointer;
+            transition: all 0.1s ease;
+            margin-top: 25px;
+            width: 100%;
+        }
+
+        .start-match-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0 var(--warm-brown);
+        }
+
+        .match-preview {
+            background: rgba(0,0,0,0.3);
+            border: 2px solid var(--bh-gold);
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .match-preview-teams {
+            font-family: 'Anton', sans-serif;
+            font-size: 1.4rem;
+            color: var(--bh-gold);
+            margin-bottom: 5px;
+        }
+
+        .match-preview-difficulty {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 0.9rem;
+            color: var(--cream);
+            opacity: 0.8;
+        }
+
         /* ========== QUESTION SCREEN ========== */
         .question-text {
             font-family: 'Fredoka', sans-serif;
@@ -1605,35 +1771,60 @@
     <div class="container">
         <!-- Welcome Header -->
         <div class="header" id="welcomeHeader">
-            <h1 class="title-main">Cricket Quiz</h1>
-            <div class="innings-bar" id="inningsInfo">Select Difficulty to Begin</div>
+            <h1 class="title-main">Quiz Cricket</h1>
+            <div class="innings-bar" id="inningsInfo">1992 World Cup Edition</div>
         </div>
 
         <!-- Game Content -->
         <div id="gameContent">
-            <!-- Difficulty Selection -->
-            <div class="game-panel welcome" id="difficultyScreen">
-                <div class="section-title">Select Your Match</div>
-
-                <div class="overs-control">
-                    <div class="overs-label">Match Duration</div>
-                    <div class="overs-display" id="oversValue">3 Overs</div>
-                    <input type="range" min="1" max="5" value="3" class="overs-slider" id="oversSlider" oninput="updateOversDisplay()">
+            <!-- Welcome Screen -->
+            <div class="game-panel welcome" id="welcomeScreen">
+                <div class="welcome-content">
+                    <div class="welcome-title">Welcome to Quiz Cricket</div>
+                    <div class="welcome-subtitle">Test your knowledge. Score runs. Win the match.</div>
+                    <button class="play-btn" onclick="goToCountrySelect()">Let's Play</button>
                 </div>
+            </div>
 
+            <!-- Country Selection -->
+            <div class="game-panel welcome hidden" id="countryScreen">
+                <div class="section-title">Choose Your Team</div>
+                <div class="country-grid" id="countryGrid"></div>
+            </div>
+
+            <!-- Difficulty Selection -->
+            <div class="game-panel welcome hidden" id="difficultyScreen">
+                <div class="section-title">Select Difficulty</div>
                 <div class="difficulty-grid">
                     <button class="diff-btn diff-easy" onclick="selectDifficulty('easy')">
                         <span>Easy</span>
-                        <span class="opponent-names">vs Monty & Grace</span>
                     </button>
                     <button class="diff-btn diff-medium" onclick="selectDifficulty('medium')">
                         <span>Medium</span>
-                        <span class="opponent-names">vs Kumble & Gavaskar</span>
                     </button>
                     <button class="diff-btn diff-hard" onclick="selectDifficulty('hard')">
                         <span>Hard</span>
-                        <span class="opponent-names">vs Warne & Bradman</span>
                     </button>
+                    <button class="diff-btn diff-legendary" onclick="selectDifficulty('legendary')">
+                        <span>Legendary</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Duration Selection -->
+            <div class="game-panel welcome hidden" id="durationScreen">
+                <div class="section-title">Match Duration</div>
+                <div class="duration-content">
+                    <div class="match-preview">
+                        <div class="match-preview-teams" id="matchPreviewTeams"></div>
+                        <div class="match-preview-difficulty" id="matchPreviewDifficulty"></div>
+                    </div>
+                    <div class="overs-control">
+                        <div class="overs-label">Overs</div>
+                        <div class="overs-display" id="oversValue">3 Overs</div>
+                        <input type="range" min="1" max="5" value="3" class="overs-slider" id="oversSlider" oninput="updateOversDisplay()">
+                    </div>
+                    <button class="start-match-btn" onclick="startMatch()">Start Match</button>
                 </div>
             </div>
 
@@ -1731,13 +1922,13 @@
                 <div class="summary-title">Match Complete!</div>
 
                 <div class="innings-summary">
-                    <h3>First Innings (You Batting)</h3>
+                    <h3 id="firstInningsTitle">First Innings</h3>
                     <div class="innings-score" id="firstInningsScore">0 runs</div>
                     <div class="innings-wickets" id="firstInningsWickets">0 wickets</div>
                 </div>
 
                 <div class="innings-summary">
-                    <h3>Second Innings (You Bowling)</h3>
+                    <h3 id="secondInningsTitle">Second Innings</h3>
                     <div class="innings-score" id="secondInningsScore">0 runs</div>
                     <div class="innings-wickets" id="secondInningsWickets">0 wickets</div>
                 </div>
@@ -1761,6 +1952,19 @@
         const BALLS_PER_OVER = 6;
         const COMPUTER_CORRECT_RATE = 0.66;
 
+        // 1992 World Cup Teams
+        const TEAMS = {
+            england: { name: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', opponent: 'australia', available: true },
+            australia: { name: 'Australia', flag: '🇦🇺', opponent: 'england', available: true },
+            india: { name: 'India', flag: '🇮🇳', opponent: 'pakistan', available: true },
+            pakistan: { name: 'Pakistan', flag: '🇵🇰', opponent: 'india', available: true },
+            newzealand: { name: 'New Zealand', flag: '🇳🇿', opponent: 'southafrica', available: false },
+            southafrica: { name: 'South Africa', flag: '🇿🇦', opponent: 'newzealand', available: false },
+            westindies: { name: 'West Indies', flag: '🌴', opponent: 'srilanka', available: false },
+            srilanka: { name: 'Sri Lanka', flag: '🇱🇰', opponent: 'westindies', available: false },
+            zimbabwe: { name: 'Zimbabwe', flag: '🇿🇼', opponent: 'kenya', available: false }
+        };
+
         // AI Strategies
         const AI_STRATEGIES = {
             easy: {
@@ -1774,11 +1978,17 @@
             hard: {
                 bowler: { name: 'Warne', dist: [12, 10, 12, 14, 23, 29] },
                 batsman: { name: 'Bradman', dist: [2, 4, 7, 15, 32, 40] }
+            },
+            legendary: {
+                bowler: { name: 'Murali', dist: [8, 8, 10, 12, 28, 34] },
+                batsman: { name: 'Tendulkar', dist: [1, 3, 5, 12, 34, 45] }
             }
         };
 
         // Game State
         let gameState = {
+            playerTeam: null,
+            opponentTeam: null,
             difficulty: null,
             overs: 3,
             totalBalls: 18,
@@ -1795,7 +2005,7 @@
             wormData: { innings1: [], innings2: [] },
             firstInningsScore: { runs: 0, wickets: 0 },
             secondInningsScore: { runs: 0, wickets: 0 },
-            phase: 'difficulty',
+            phase: 'welcome',
             currentQuestion: null,
             playerAnswer: null,
             computerAnswer: null,
@@ -1900,7 +2110,7 @@
 
         // UI Functions
         function showScreen(screenId) {
-            ['difficultyScreen', 'questionScreen', 'deliveryScreen', 'resultScreen', 'inningsBreakScreen', 'summaryScreen']
+            ['welcomeScreen', 'countryScreen', 'difficultyScreen', 'durationScreen', 'questionScreen', 'deliveryScreen', 'resultScreen', 'inningsBreakScreen', 'summaryScreen']
                 .forEach(id => document.getElementById(id).classList.add('hidden'));
             document.getElementById(screenId).classList.remove('hidden');
         }
@@ -2008,9 +2218,68 @@
             document.getElementById('oversValue').textContent = `${overs} ${plural}`;
         }
 
+        // Populate country grid on load
+        function populateCountryGrid() {
+            const grid = document.getElementById('countryGrid');
+            grid.innerHTML = '';
+
+            Object.entries(TEAMS).forEach(([key, team]) => {
+                const btn = document.createElement('button');
+                btn.className = 'country-btn';
+
+                if (team.available) {
+                    btn.innerHTML = `
+                        <span class="country-flag">${team.flag}</span>
+                        <span class="country-name">${team.name}</span>
+                    `;
+                    btn.onclick = () => selectCountry(key);
+                } else {
+                    btn.disabled = true;
+                    btn.innerHTML = `
+                        <span class="country-flag">${team.flag}</span>
+                        <span class="country-name">${team.name}</span>
+                        <span class="coming-soon-label">Coming soon <span class="info-icon" onclick="showComingSoonInfo(event)">?</span></span>
+                    `;
+                }
+
+                grid.appendChild(btn);
+            });
+        }
+
+        function showComingSoonInfo(event) {
+            event.stopPropagation();
+            // Could show a modal here, for now just prevent click
+        }
+
+        // Navigation Functions
+        function goToCountrySelect() {
+            populateCountryGrid();
+            showScreen('countryScreen');
+        }
+
+        function selectCountry(countryKey) {
+            gameState.playerTeam = countryKey;
+            gameState.opponentTeam = TEAMS[countryKey].opponent;
+            showScreen('difficultyScreen');
+        }
+
         // Game Flow Functions
         function selectDifficulty(difficulty) {
             gameState.difficulty = difficulty;
+
+            // Update match preview
+            const playerTeam = TEAMS[gameState.playerTeam];
+            const opponentTeam = TEAMS[gameState.opponentTeam];
+            document.getElementById('matchPreviewTeams').textContent =
+                `${playerTeam.flag} ${playerTeam.name} vs ${opponentTeam.name} ${opponentTeam.flag}`;
+
+            const difficultyNames = { easy: 'Easy', medium: 'Medium', hard: 'Hard', legendary: 'Legendary' };
+            document.getElementById('matchPreviewDifficulty').textContent = `${difficultyNames[difficulty]} Difficulty`;
+
+            showScreen('durationScreen');
+        }
+
+        function startMatch() {
             gameState.overs = parseInt(document.getElementById('oversSlider').value);
             gameState.totalBalls = gameState.overs * BALLS_PER_OVER;
             gameState.phase = 'question';
@@ -2019,9 +2288,12 @@
             document.getElementById('welcomeHeader').classList.add('hidden');
             document.getElementById('scorebug').classList.remove('hidden');
 
-            // Set labels
-            document.getElementById('batsmanLabel').textContent = 'Batsman';
-            document.getElementById('bowlerLabel').textContent = AI_STRATEGIES[difficulty].bowler.name;
+            // Set labels with team names
+            const playerTeam = TEAMS[gameState.playerTeam];
+            const opponentTeam = TEAMS[gameState.opponentTeam];
+
+            document.getElementById('batsmanLabel').textContent = `${playerTeam.flag} ${playerTeam.name}`;
+            document.getElementById('bowlerLabel').textContent = `${opponentTeam.name} ${opponentTeam.flag}`;
 
             updateScoreboard();
             startQuestionPhase();
@@ -2208,24 +2480,30 @@
             const bowlerNum = gameState.playerBatting ? gameState.computerNumber : gameState.playerNumber;
             const playerNumberChosen = gameState.playerNumber;
 
+            // Get team names for commentary
+            const playerTeam = TEAMS[gameState.playerTeam];
+            const opponentTeam = TEAMS[gameState.opponentTeam];
+            const battingTeam = gameState.playerBatting ? playerTeam : opponentTeam;
+            const bowlingTeam = gameState.playerBatting ? opponentTeam : playerTeam;
+
             if (gameState.playerBatting) {
                 if (numbersMatch && !gameState.isNoBall) {
                     isWicket = true;
                     gameState.wickets++;
                     gameState.runs = Math.max(0, gameState.runs - WICKET_PENALTY);
-                    commentary = `OUT! Bowled! -${WICKET_PENALTY} runs penalty.`;
+                    commentary = `OUT! Bowled by ${bowlingTeam.name}! -${WICKET_PENALTY} runs penalty.`;
                 } else if (numbersMatch && gameState.isNoBall) {
-                    commentary = `WICKET!! ...Oh wait, NO BALL! You survive! 0 runs.`;
+                    commentary = `WICKET!! ...Oh wait, NO BALL! ${battingTeam.name} survive! 0 runs.`;
                 } else {
                     runsScored = gameState.playerNumber;
                     gameState.runs += runsScored;
                     const runWord = runsScored === 1 ? 'run' : 'runs';
                     if (runsScored === 4) {
-                        commentary = `FOUR! ${runsScored} ${runWord} to the batsman`;
+                        commentary = `FOUR! ${runsScored} ${runWord} to ${battingTeam.name}`;
                     } else if (runsScored === 6) {
-                        commentary = `SIX! Maximum! ${runsScored} ${runWord}`;
+                        commentary = `SIX! Maximum! ${runsScored} ${runWord} for ${battingTeam.name}`;
                     } else {
-                        commentary = `${runsScored} ${runWord} to the batsman`;
+                        commentary = `${runsScored} ${runWord} to ${battingTeam.name}`;
                     }
                 }
             } else {
@@ -2233,14 +2511,14 @@
                     isWicket = true;
                     gameState.wickets++;
                     gameState.runs = Math.max(0, gameState.runs - WICKET_PENALTY);
-                    commentary = `WICKET! Great bowling! -${WICKET_PENALTY} runs.`;
+                    commentary = `WICKET! Great bowling by ${bowlingTeam.name}! -${WICKET_PENALTY} runs.`;
                 } else if (numbersMatch && gameState.isNoBall) {
-                    commentary = `GOT HIM!! ...No wait, NO BALL! Batsman survives! 0 runs.`;
+                    commentary = `GOT HIM!! ...No wait, NO BALL! ${battingTeam.name} survive! 0 runs.`;
                 } else {
                     runsScored = gameState.computerNumber;
                     gameState.runs += runsScored;
                     const runWord = runsScored === 1 ? 'run' : 'runs';
-                    commentary = `${runsScored} ${runWord} to the computer`;
+                    commentary = `${runsScored} ${runWord} to ${battingTeam.name}`;
                 }
             }
 
@@ -2481,9 +2759,11 @@
             const title = document.getElementById('wormTitle');
             title.textContent = isMatchComplete ? 'Match Summary' : '1st Innings';
 
-            // Update badges
-            document.getElementById('wormBatBadge').textContent = 'YOU';
-            document.getElementById('wormBowlBadge').textContent = 'CPU';
+            // Update badges with team names
+            const playerTeam = TEAMS[gameState.playerTeam];
+            const opponentTeam = TEAMS[gameState.opponentTeam];
+            document.getElementById('wormBatBadge').textContent = `${playerTeam.flag} ${playerTeam.name}`;
+            document.getElementById('wormBowlBadge').textContent = `${opponentTeam.name} ${opponentTeam.flag}`;
 
             // Update legend for match complete (show both innings)
             const legend = document.getElementById('wormLegend');
@@ -2491,11 +2771,11 @@
                 legend.innerHTML = `
                     <div class="legend-item">
                         <div class="legend-line innings1"></div>
-                        <span>Your Innings</span>
+                        <span>${playerTeam.flag} ${playerTeam.name}</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-line innings2"></div>
-                        <span>CPU Innings</span>
+                        <span>${opponentTeam.flag} ${opponentTeam.name}</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-dot six"></div>
@@ -2510,7 +2790,7 @@
                 legend.innerHTML = `
                     <div class="legend-item">
                         <div class="legend-line innings1"></div>
-                        <span>Your Innings</span>
+                        <span>${playerTeam.flag} ${playerTeam.name}</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-dot six"></div>
@@ -2528,18 +2808,18 @@
             if (isMatchComplete) {
                 summary.innerHTML = `
                     <div class="worm-innings-score">
-                        <div class="worm-innings-label">Your Score</div>
+                        <div class="worm-innings-label">${playerTeam.flag} ${playerTeam.name}</div>
                         <div class="worm-innings-runs batting">${gameState.firstInningsScore.runs}</div>
                     </div>
                     <div class="worm-innings-score">
-                        <div class="worm-innings-label">CPU Score</div>
+                        <div class="worm-innings-label">${opponentTeam.flag} ${opponentTeam.name}</div>
                         <div class="worm-innings-runs bowling">${gameState.secondInningsScore.runs}</div>
                     </div>
                 `;
             } else {
                 summary.innerHTML = `
                     <div class="worm-innings-score">
-                        <div class="worm-innings-label">Your Score</div>
+                        <div class="worm-innings-label">${playerTeam.flag} ${playerTeam.name}</div>
                         <div class="worm-innings-runs batting">${gameState.firstInningsScore.runs}</div>
                     </div>
                 `;
@@ -2572,8 +2852,10 @@
                 gameState.ballsInOver = 0;
                 gameState.ballHistory = [];
 
-                document.getElementById('batsmanLabel').textContent = AI_STRATEGIES[gameState.difficulty].batsman.name;
-                document.getElementById('bowlerLabel').textContent = 'Bowler';
+                const playerTeam = TEAMS[gameState.playerTeam];
+                const opponentTeam = TEAMS[gameState.opponentTeam];
+                document.getElementById('batsmanLabel').textContent = `${opponentTeam.flag} ${opponentTeam.name}`;
+                document.getElementById('bowlerLabel').textContent = `${playerTeam.name} ${playerTeam.flag}`;
 
                 updateScoreboard();
                 startQuestionPhase();
@@ -2846,30 +3128,32 @@
         function showSummary() {
             gameState.phase = 'summary';
 
+            const playerTeam = TEAMS[gameState.playerTeam];
+            const opponentTeam = TEAMS[gameState.opponentTeam];
             const playerScore = gameState.firstInningsScore.runs;
             const computerScore = gameState.secondInningsScore.runs;
 
+            document.getElementById('firstInningsTitle').textContent = `${playerTeam.flag} ${playerTeam.name} Batting`;
             document.getElementById('firstInningsScore').textContent = `${gameState.firstInningsScore.runs} runs`;
             document.getElementById('firstInningsWickets').textContent = `${gameState.firstInningsScore.wickets} wickets lost`;
 
+            document.getElementById('secondInningsTitle').textContent = `${opponentTeam.flag} ${opponentTeam.name} Batting`;
             document.getElementById('secondInningsScore').textContent = `${gameState.secondInningsScore.runs} runs`;
             document.getElementById('secondInningsWickets').textContent = `${gameState.secondInningsScore.wickets} wickets taken`;
 
             const winnerDiv = document.getElementById('winnerMessage');
-            const bowlerName = AI_STRATEGIES[gameState.difficulty].bowler.name;
-            const batsmanName = AI_STRATEGIES[gameState.difficulty].batsman.name;
 
             if (playerScore > computerScore) {
                 const margin = playerScore - computerScore;
                 winnerDiv.className = 'winner-message win';
-                winnerDiv.innerHTML = `You Win by ${margin} runs!<small>vs ${bowlerName} & ${batsmanName}</small>`;
+                winnerDiv.innerHTML = `${playerTeam.flag} ${playerTeam.name} Win by ${margin} runs!<small>vs ${opponentTeam.name}</small>`;
             } else if (computerScore > playerScore) {
                 const margin = computerScore - playerScore;
                 winnerDiv.className = 'winner-message lose';
-                winnerDiv.innerHTML = `Computer Wins by ${margin} runs<small>vs ${bowlerName} & ${batsmanName}</small>`;
+                winnerDiv.innerHTML = `${opponentTeam.flag} ${opponentTeam.name} Win by ${margin} runs<small>vs ${playerTeam.name}</small>`;
             } else {
                 winnerDiv.className = 'winner-message tie';
-                winnerDiv.innerHTML = `It's a Tie!<small>vs ${bowlerName} & ${batsmanName}</small>`;
+                winnerDiv.innerHTML = `It's a Tie!<small>${playerTeam.name} vs ${opponentTeam.name}</small>`;
             }
 
             document.getElementById('scorebug').classList.add('hidden');
@@ -2878,6 +3162,8 @@
 
         function restartGame() {
             gameState = {
+                playerTeam: null,
+                opponentTeam: null,
                 difficulty: null,
                 overs: 3,
                 totalBalls: 18,
@@ -2892,7 +3178,7 @@
                 wormData: { innings1: [], innings2: [] },
                 firstInningsScore: { runs: 0, wickets: 0 },
                 secondInningsScore: { runs: 0, wickets: 0 },
-                phase: 'difficulty',
+                phase: 'welcome',
                 currentQuestion: null,
                 playerAnswer: null,
                 computerAnswer: null,
@@ -2912,7 +3198,7 @@
             document.getElementById('oversSlider').value = 3;
             updateOversDisplay();
 
-            showScreen('difficultyScreen');
+            showScreen('welcomeScreen');
         }
 
         // Explainer modal functions
